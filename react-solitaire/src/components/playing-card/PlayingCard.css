@@ -3,6 +3,7 @@
     border-radius: 5px;
     background-color: white;
     padding: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
 }
 
 .suit-red {
@@ -20,9 +21,13 @@
 }
 
 .card-footer {
-    text-align: right;
+    text-align: left;
     display: grid;
     line-height: 0.9;
+}
+
+.card-footer > span {
+    transform: rotate(180deg);
 }
 
 .card-center {

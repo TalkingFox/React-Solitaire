@@ -33,6 +33,9 @@ function PlayingCard({ suit, text }: Card) {
             cardColor = "red";
             break;
     }
+
+    
+
     const cardClasses = `card suit-${cardColor}`
     const backdropClass = `card-backdrop-${cardColor} layer-sibling`
     return (
