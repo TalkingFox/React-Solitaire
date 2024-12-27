@@ -14,6 +14,13 @@ interface Card {
     text: string,
 }
 
+const facesByText = new Map([
+    ['A', 'Ace'],
+    ['J', 'Jack'],
+    ['Q', 'Queen'],
+    ['K', 'King']
+])
+
 function PlayingCard({ suit, text }: Card) {
     const [cardSymbol, cardColor] = GetSymbolAndColorFromSuit(suit)
     let numberOfElements = Number(text);
@@ -21,6 +28,8 @@ function PlayingCard({ suit, text }: Card) {
         numberOfElements = 1
     }
     const cardClasses = `card suit-${cardColor}`
+    const cardFace = facesByText.get(text) ?? ''
+
     return (
         <>
             <div className={cardClasses}>
@@ -28,7 +37,7 @@ function PlayingCard({ suit, text }: Card) {
                     <span>{text}</span>
                     <span>{cardSymbol}</span>
                 </div>
-                <CardCenter symbol={cardSymbol} numberOfElements={numberOfElements} />
+                <CardCenter symbol={cardSymbol} numberOfElements={numberOfElements} face={cardFace} />
                 <div className="card-footer">
                     <span>{cardSymbol}</span>
                     <span>{text}</span>

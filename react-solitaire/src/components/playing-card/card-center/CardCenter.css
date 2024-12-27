@@ -29,7 +29,7 @@
 }
 
 .card-column > span {
-    margin: -5px 5px -5px 5px
+    margin: -5px 5px -5px 3px
 }
 
 .card-column span:last-of-type {
@@ -42,4 +42,9 @@
 
 .card-symbol-rotated {
     transform: rotate(180deg);
+}
+
+.card-face {
+    font-size: 5em;
+    margin: -20px;
 }
