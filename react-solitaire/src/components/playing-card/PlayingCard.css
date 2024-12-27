@@ -30,54 +30,6 @@
     transform: rotate(180deg);
 }
 
-.card-center {
-    min-width: 100px;
-    min-height: 100px;
-    display: grid;
-}
-
-.card-center>span {
-    text-align: center;
-    height: 100%;
-    width: 100%;
-    display: inline-block;
-    grid-column: 1;
-    grid-row: 1;
-}
-
-.card-backdrop-black {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: sans-serif;
-    color: #fff;
-    height: 100%;
-    width: 100%;
-    border-radius: 50%;
-    background: radial-gradient(ellipse at center,
-            rgba(255, 113, 12, 0) 60%,
-            rgba(0, 0, 0, 1) 51.5%);
-}
-
-.card-backdrop-red {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: sans-serif;
-    color: #fff;
-    height: 100%;
-    width: 100%;
-    border-radius: 50%;
-    background: radial-gradient(ellipse at center,
-            rgba(255, 113, 12, 0) 60%,
-            rgba(255, 0, 0, 1) 51.5%);
-}
-
-.layer-sibling {
-    grid-row: 1;
-    grid-column: 1;
-}
-
 .value-parent {
     display: table;
 }

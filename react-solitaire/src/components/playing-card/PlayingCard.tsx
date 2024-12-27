@@ -1,3 +1,5 @@
+import CardCenter from './card-center/CardCenter'
+import { GetSymbolAndColorFromSuit } from './CardSymbolGenerator'
 import './PlayingCard.css'
 
 export enum CardSuit {
@@ -9,50 +11,26 @@ export enum CardSuit {
 
 interface Card {
     suit: CardSuit,
-    text: String
+    text: string,
 }
 
 function PlayingCard({ suit, text }: Card) {
-    let cardColor = "red";
-    let cardEmoji = "🐰";
-    switch (suit) {
-        case CardSuit.Clubs:
-            cardEmoji = "♣";
-            cardColor = "black";
-            break;
-        case CardSuit.Spades:
-            cardEmoji = "♠";
-            cardColor = "black";
-            break;
-        case CardSuit.Diamonds:
-            cardEmoji = "♦";
-            cardColor = "red";
-            break;
-        case CardSuit.Hearts:
-            cardEmoji = "♥";
-            cardColor = "red";
-            break;
+    const [cardSymbol, cardColor] = GetSymbolAndColorFromSuit(suit)
+    let numberOfElements = Number(text);
+    if (isNaN(numberOfElements)) {
+        numberOfElements = 1
     }
-
-    
-
     const cardClasses = `card suit-${cardColor}`
-    const backdropClass = `card-backdrop-${cardColor} layer-sibling`
     return (
         <>
             <div className={cardClasses}>
                 <div className="card-header">
                     <span>{text}</span>
-                    <span>{cardEmoji}</span>
+                    <span>{cardSymbol}</span>
                 </div>
-                <div className='card-center'>
-                    <span className={backdropClass}></span>
-                    <div className='value-parent layer-sibling'>
-                        <span className='card-value'>10</span>
-                    </div>
-                </div>
+                <CardCenter symbol={cardSymbol} numberOfElements={numberOfElements} />
                 <div className="card-footer">
-                    <span>{cardEmoji}</span>
+                    <span>{cardSymbol}</span>
                     <span>{text}</span>
                 </div>
             </div>
