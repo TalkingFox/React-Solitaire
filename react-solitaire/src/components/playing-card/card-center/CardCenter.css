@@ -1,23 +1,15 @@
 .card-center {
-    min-width: 100px;
-    min-height: 100px;
+    width: 100px;
+    min-height: 70%;
     display: flex;
     justify-content: space-between;
     box-sizing: border-box;
-    padding: 10px 10px 10px 10px;
+    padding: 0px 15px 0px 15px;
+    margin-top: -15px;
 }
 
 .card-center--centered {
     justify-content: center !important;
-}
-
-.card-center>span {
-    text-align: center;
-    height: 100%;
-    width: 100%;
-    display: inline-block;
-    grid-column: 1;
-    grid-row: 1;
 }
 
 .card-column {
@@ -25,6 +17,7 @@
     flex-direction: column;
     font-size: 1.5em;
     justify-content: space-between;
+    line-height: initial;
 }
 
 .card-column--centered {
@@ -33,6 +26,10 @@
 
 .card-symbol-big {
     flex-grow: 0.2;
+}
+
+.card-column > span {
+    margin: -5px 5px -5px 5px
 }
 
 .card-column span:last-of-type {
