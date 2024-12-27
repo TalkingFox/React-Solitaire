@@ -1,0 +1,86 @@
+.card {
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: white;
+    padding: 5px;
+}
+
+.suit-red {
+    color: red;
+}
+
+.suit-black {
+    color: black;
+}
+
+.card-header {
+    text-align: left;
+    display: grid;
+    line-height: 0.9;
+}
+
+.card-footer {
+    text-align: right;
+    display: grid;
+    line-height: 0.9;
+}
+
+.card-center {
+    min-width: 100px;
+    min-height: 100px;
+    display: grid;
+}
+
+.card-center>span {
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    display: inline-block;
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.card-backdrop-black {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+    color: #fff;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center,
+            rgba(255, 113, 12, 0) 60%,
+            rgba(0, 0, 0, 1) 51.5%);
+}
+
+.card-backdrop-red {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+    color: #fff;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center,
+            rgba(255, 113, 12, 0) 60%,
+            rgba(255, 0, 0, 1) 51.5%);
+}
+
+.layer-sibling {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+.value-parent {
+    display: table;
+}
+
+.card-value {
+    display: table-cell;
+    font-size: 2em;
+    width: 100%;
+    height: 100%;
+    vertical-align: middle;
+}
