@@ -40,16 +40,10 @@ function PlayingCard({ suit, text }: CardProps) {
         getInitialData: () => ({ suit, text }),
         getData: () => ({ suit, text }),
         canDrag: () => true,
-        canDrop: () => true,
+        canDrop: () => false,
     });
 
     const castPreview = previewElement as RefObject<HTMLDivElement>;
-    const onDragover: DragEventHandler = (event: React.DragEvent) => {
-        event.preventDefault();
-    }
-    // addEventListener('dragover', (event) => {
-    //     event.preventDefault();
-    // });
 
     return (
         <Fragment>
