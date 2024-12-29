@@ -58,16 +58,18 @@ function CardCenter({ symbol, face, numberOfElements }: CardFace) {
         <>
             <div className={parentClassName}>
                 {
-                    columns.map(column => {
+                    columns.map((column, columnIndex) => {
                         return (
-                            <div className={column.class}>
+                            <div className={column.class} key={crypto.randomUUID()}>
                                 {
                                     [...Array(column.elementCount)].map((_, index) => {
                                         let className = '';
                                         if (column.applyClassToSecondHalf && index >= Math.ceil(column.elementCount / 2)) {
                                             className = column.elementClass ?? '';
                                         }
-                                        return (<span className={className}>{symbol}</span>)
+                                        return (
+                                            <span className={className} key={crypto.randomUUID()}>{symbol}</span>
+                                        )
                                     })
                                 }
                             </div>

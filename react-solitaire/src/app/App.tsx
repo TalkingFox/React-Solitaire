@@ -24,7 +24,7 @@ function App() {
                     <PlayingCard suit={CardSuit.Hearts} text="Q" />
                     <PlayingCard suit={CardSuit.Hearts} text="K" />
                 </div>
-                <div className='row'>
+                {/* <div className='row'>
                     <PlayingCard suit={CardSuit.Spades} text="A" />
                     <PlayingCard suit={CardSuit.Spades} text="2" />
                     <PlayingCard suit={CardSuit.Spades} text="3" />
@@ -68,7 +68,7 @@ function App() {
                     <PlayingCard suit={CardSuit.Clubs} text="J" />
                     <PlayingCard suit={CardSuit.Clubs} text="Q" />
                     <PlayingCard suit={CardSuit.Clubs} text="K" />
-                </div>
+                </div> */}
             </div>
         </>
     )

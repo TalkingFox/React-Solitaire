@@ -1,6 +1,10 @@
+import { Fragment, RefObject, useRef } from 'react'
 import CardCenter from './card-center/CardCenter'
 import { GetSymbolAndColorFromSuit } from './CardSymbolGenerator'
 import './PlayingCard.css'
+import { useDraggable } from '../../hooks/useDraggable'
+import { createPortal } from 'react-dom'
+import { previewStyles } from '../../shared/style'
 
 export enum CardSuit {
     Spades,
@@ -9,7 +13,7 @@ export enum CardSuit {
     Diamonds
 }
 
-interface Card {
+interface CardProps {
     suit: CardSuit,
     text: string,
 }
@@ -21,7 +25,7 @@ const facesByText = new Map([
     ['K', 'King']
 ])
 
-function PlayingCard({ suit, text }: Card) {
+function PlayingCard({ suit, text }: CardProps) {
     const [cardSymbol, cardColor] = GetSymbolAndColorFromSuit(suit)
     let numberOfElements = Number(text);
     if (isNaN(numberOfElements)) {
@@ -30,9 +34,20 @@ function PlayingCard({ suit, text }: Card) {
     const cardClasses = `card suit-${cardColor}`
     const cardFace = facesByText.get(text) ?? ''
 
+    const itemRef = useRef<HTMLDivElement>(null);
+    const { state, preview, previewElement } = useDraggable({
+        element: itemRef,
+        getInitialData: () => ({ suit, text }),
+        getData: () => ({ suit, text }),
+        canDrag: () => true,
+        canDrop: () => true,
+    });
+
+    const castPreview = previewElement as RefObject<HTMLDivElement>;
+
     return (
-        <>
-            <div className={cardClasses}>
+        <Fragment>
+            <div className={cardClasses} ref={itemRef} style={{opacity: state == 'dragging' ? 0 : 1}}>
                 <div className="card-header">
                     <span>{text}</span>
                     <span>{cardSymbol}</span>
@@ -43,8 +58,22 @@ function PlayingCard({ suit, text }: Card) {
                     <span>{text}</span>
                 </div>
             </div>
-        </>
-    )
+
+            {preview && createPortal(
+                <div className={cardClasses} ref={castPreview} style={previewStyles(preview) as React.CSSProperties}>
+                    <div className="card-header">
+                        <span>{text}</span>
+                        <span>{cardSymbol}</span>
+                    </div>
+                    <CardCenter symbol={cardSymbol} numberOfElements={numberOfElements} face={cardFace} />
+                    <div className="card-footer">
+                        <span>{cardSymbol}</span>
+                        <span>{text}</span>
+                    </div>
+                </div>, document.body
+            )}
+        </Fragment>
+    );
 }
 
 export default PlayingCard
