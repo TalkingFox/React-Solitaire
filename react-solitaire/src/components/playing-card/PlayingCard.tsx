@@ -1,4 +1,4 @@
-import { Fragment, RefObject, useRef } from 'react'
+import { DragEventHandler, Fragment, RefObject, useRef } from 'react'
 import CardCenter from './card-center/CardCenter'
 import { GetSymbolAndColorFromSuit } from './CardSymbolGenerator'
 import './PlayingCard.css'
@@ -44,6 +44,12 @@ function PlayingCard({ suit, text }: CardProps) {
     });
 
     const castPreview = previewElement as RefObject<HTMLDivElement>;
+    const onDragover: DragEventHandler = (event: React.DragEvent) => {
+        event.preventDefault();
+    }
+    // addEventListener('dragover', (event) => {
+    //     event.preventDefault();
+    // });
 
     return (
         <Fragment>
@@ -60,7 +66,7 @@ function PlayingCard({ suit, text }: CardProps) {
             </div>
 
             {preview && createPortal(
-                <div className={cardClasses} ref={castPreview} style={previewStyles(preview) as React.CSSProperties}>
+                <div className={cardClasses} ref={castPreview} style={previewStyles(preview) as React.CSSProperties} >
                     <div className="card-header">
                         <span>{text}</span>
                         <span>{cardSymbol}</span>
