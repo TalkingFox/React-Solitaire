@@ -1,4 +1,4 @@
-import { CardSuit } from "./PlayingCard"
+import { CardSuit } from "../../shared/enums";
 
 export function GetSymbolAndColorFromSuit(suit: CardSuit): [String, String] {
     let cardColor = "red";

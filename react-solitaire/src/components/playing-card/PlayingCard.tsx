@@ -1,21 +1,16 @@
-import { DragEventHandler, Fragment, RefObject, useRef } from 'react'
+import { Fragment, RefObject, useRef } from 'react'
 import CardCenter from './card-center/CardCenter'
 import { GetSymbolAndColorFromSuit } from './CardSymbolGenerator'
 import './PlayingCard.css'
 import { useDraggable } from '../../hooks/useDraggable'
 import { createPortal } from 'react-dom'
 import { previewStyles } from '../../shared/style'
-
-export enum CardSuit {
-    Spades,
-    Clubs,
-    Hearts,
-    Diamonds
-}
+import { CardSuit } from '../../shared/enums'
 
 interface CardProps {
     suit: CardSuit,
     text: string,
+    isFaceDown?: boolean
 }
 
 const facesByText = new Map([
@@ -25,7 +20,28 @@ const facesByText = new Map([
     ['K', 'King']
 ])
 
-function PlayingCard({ suit, text }: CardProps) {
+function RenderFaceDownCard() {
+    return (
+        <div className='card card-back'>
+            <div className='card-back-border'>
+                <div className='card-back-border-2'>
+                    <div className='card-back-pattern-container'>
+                        <div className='card-back-circle-outer'>
+                            <div className='card-back-circle-inner-ring'>
+                                <div className='card-back-circle-inner-solid'></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function PlayingCard({ suit, text, isFaceDown = false }: CardProps) {
+    if (isFaceDown) {
+        return RenderFaceDownCard();
+    }
     const [cardSymbol, cardColor] = GetSymbolAndColorFromSuit(suit)
     let numberOfElements = Number(text);
     if (isNaN(numberOfElements)) {
@@ -47,7 +63,7 @@ function PlayingCard({ suit, text }: CardProps) {
 
     return (
         <Fragment>
-            <div className={cardClasses} ref={itemRef} style={{opacity: state == 'dragging' ? 0 : 1}}>
+            <div className={cardClasses} ref={itemRef} style={{ opacity: state == 'dragging' ? 0 : 1 }}>
                 <div className="card-header">
                     <span>{text}</span>
                     <span>{cardSymbol}</span>
