@@ -11,6 +11,7 @@
 
 .card-back {
     background-color: rgb(29, 78, 216);
+    cursor: pointer !important;
 
 }
 
