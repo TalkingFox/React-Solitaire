@@ -3,6 +3,7 @@ import './App.css'
 import PlayingCard from '../components/playing-card/PlayingCard.tsx'
 import { CardSuit } from '../shared/enums.ts';
 import DeckStack from '../components/deck-stack/DeckStack.tsx';
+import CardStack from '../components/card-stack/CardStack.tsx';
 
 
 function App() {
@@ -15,16 +16,17 @@ function App() {
     return (
         <>
             <div className="top-row">
-                <DeckStack/>
+                <DeckStack />
+                <div className="deck-spacer"></div>
+                <div className="card-stacks row">
+                    <CardStack ></CardStack>
+                    <CardStack ></CardStack>
+                    <CardStack ></CardStack>
+                    <CardStack ></CardStack>
+                </div>
             </div>
             <div>
-                <div className='row'>
-                </div>
-                <div className='row'>
-                </div>
-                <div className='row'>
-                </div>
-                <div className='row'>
+                <div className='card-columns'>
                     <PlayingCard suit={CardSuit.Clubs} text="A" />
                     <PlayingCard suit={CardSuit.Clubs} text="2" />
                     <PlayingCard suit={CardSuit.Clubs} text="3" />
@@ -32,12 +34,6 @@ function App() {
                     <PlayingCard suit={CardSuit.Clubs} text="5" />
                     <PlayingCard suit={CardSuit.Clubs} text="6" />
                     <PlayingCard suit={CardSuit.Clubs} text="7" />
-                    <PlayingCard suit={CardSuit.Clubs} text="8" />
-                    <PlayingCard suit={CardSuit.Clubs} text="9" />
-                    <PlayingCard suit={CardSuit.Clubs} text="10" />
-                    <PlayingCard suit={CardSuit.Clubs} text="J" />
-                    <PlayingCard suit={CardSuit.Clubs} text="Q" />
-                    <PlayingCard suit={CardSuit.Clubs} text="K" />
                 </div>
             </div>
         </>
