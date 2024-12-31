@@ -7,10 +7,11 @@ import { createPortal } from 'react-dom'
 import { previewStyles } from '../../shared/style'
 import { CardSuit } from '../../shared/enums'
 
-interface CardProps {
+export interface CardProps {
     suit: CardSuit,
     text: string,
     isFaceDown?: boolean
+    onClick?: () => void
 }
 
 const facesByText = new Map([
@@ -20,9 +21,9 @@ const facesByText = new Map([
     ['K', 'King']
 ])
 
-function RenderFaceDownCard() {
+function RenderFaceDownCard(onClick?: () => void) {
     return (
-        <div className='card card-back'>
+        <div className='card card-back' onClick={onClick}>
             <div className='card-back-border'>
                 <div className='card-back-border-2'>
                     <div className='card-back-pattern-container'>
@@ -38,9 +39,9 @@ function RenderFaceDownCard() {
     )
 }
 
-function PlayingCard({ suit, text, isFaceDown = false }: CardProps) {
+function PlayingCard({ suit, text, isFaceDown = false, onClick }: CardProps) {
     if (isFaceDown) {
-        return RenderFaceDownCard();
+        return RenderFaceDownCard(onClick);
     }
     const [cardSymbol, cardColor] = GetSymbolAndColorFromSuit(suit)
     let numberOfElements = Number(text);
@@ -63,7 +64,10 @@ function PlayingCard({ suit, text, isFaceDown = false }: CardProps) {
 
     return (
         <Fragment>
-            <div className={cardClasses} ref={itemRef} style={{ opacity: state == 'dragging' ? 0 : 1 }}>
+            <div className={cardClasses}
+                ref={itemRef}
+                style={{ opacity: state == 'dragging' ? 0 : 1 }}
+                onClick={onClick}>
                 <div className="card-header">
                     <span>{text}</span>
                     <span>{cardSymbol}</span>

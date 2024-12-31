@@ -1,19 +1,23 @@
-import { CardSuit } from '../../../shared/enums';
-import PlayingCard from '../../playing-card/PlayingCard';
+import PlayingCard, { CardProps } from '../../playing-card/PlayingCard';
 import './DrawPile.css';
 
-function DrawPile() {
+export interface DrawPileProps {
+    playedCards: CardProps[]
+}
+
+function DrawPile({ playedCards }: DrawPileProps) {
     return (
         <div className='draw-pile'>
-            <div className='pile-card card-1'>
-                <PlayingCard suit={CardSuit.Clubs} text="A"></PlayingCard>
-            </div>
-            <div className='pile-card card-2'>
-                <PlayingCard suit={CardSuit.Diamonds} text="K"></PlayingCard>
-            </div>
-            <div className='pile-card card-3'>
-                <PlayingCard suit={CardSuit.Spades} text="7"></PlayingCard>
-            </div>
+            {
+                playedCards.map((card, index) => {
+                    let className = `pile-card card-${index + 1}`;
+                    return (
+                        <div className={className} key={crypto.randomUUID()}>
+                            <PlayingCard suit={card.suit} text={card.text}></PlayingCard>
+                        </div>
+                    )
+                })
+            }
         </div>
     )
 }

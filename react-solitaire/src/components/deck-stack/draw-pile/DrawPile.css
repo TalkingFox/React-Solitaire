@@ -1,5 +1,6 @@
 .draw-pile {
     display: grid;
+    width: 1.6rem;
 }
 
 .pile-card {
