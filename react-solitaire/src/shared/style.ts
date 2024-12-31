@@ -1,7 +1,5 @@
 export const previewStyles = (preview: { bounds: DOMRect }) => ({
     position: "fixed",
-    width: `${preview.bounds.width}px`,
-    height: `${preview.bounds.height}px`,
     pointerEvents: "none",
     willChange: "transform",
     zIndex: 1000,
