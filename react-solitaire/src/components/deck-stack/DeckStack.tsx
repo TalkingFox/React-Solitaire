@@ -47,7 +47,6 @@ function DeckStack() {
             newDeck.pop(),
             newDeck.pop()
         ].filter(x => x !== null && x !== undefined);
-        console.log(poppedCards);
         newPlayedCards.push(...poppedCards);
 
         setDeck(newDeck);
