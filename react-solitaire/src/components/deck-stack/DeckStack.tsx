@@ -39,7 +39,6 @@ function DeckStack() {
     const [lastThreeCards, setLastThreeCards] = useState<CardProps[]>([]);
 
     const drawThree = () => {
-        console.log('Draw Three');
         const newDeck = deck.slice(0)
         const newPlayedCards = playedCards.slice(0);
 
