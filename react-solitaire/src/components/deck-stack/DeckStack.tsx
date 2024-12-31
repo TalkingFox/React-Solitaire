@@ -1,6 +1,7 @@
 import { CardSuit } from "../../shared/enums"
 import PlayingCard from "../playing-card/PlayingCard";
 import './DeckStack.css'
+import DrawPile from "./draw-pile/DrawPile";
 
 function DeckStack() {
     const cards: JSX.Element[] = []
@@ -17,7 +18,8 @@ function DeckStack() {
 
     return (
         <div className="deck-stack">
-            <PlayingCard suit={CardSuit.Hearts} text="A" isFaceDown={true}/>
+            <PlayingCard suit={CardSuit.Hearts} text="A" isFaceDown={true} />
+            <DrawPile></DrawPile>
         </div>
     )
 }
