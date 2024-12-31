@@ -13,7 +13,7 @@ function DeckStack() {
             CardSuit.Spades
         ]
         const texts = [
-            "A", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"
+            "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"
         ]
 
         const fullDeck = suits.flatMap(suit => {
@@ -26,10 +26,11 @@ function DeckStack() {
             });
         });
 
+
         // shuffle deck
         for (let i = fullDeck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [fullDeck[i], fullDeck[j]] = [fullDeck[j], fullDeck[j]];
+            const shuffle = Math.floor(Math.random() * i);
+            [fullDeck[i], fullDeck[shuffle]] = [fullDeck[shuffle], fullDeck[i]];
         }
         return fullDeck;
     }, []);
