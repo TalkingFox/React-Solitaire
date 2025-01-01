@@ -24,15 +24,19 @@ function CardStack({ cards, onCardDropped }: CardStackProps) {
         });
     });
 
-    let displayCard: JSX.Element | null = null;
+    let displayCards: JSX.Element[] = []
     if (cards.length > 0) {
-        const card = cards[cards.length - 1]
-        displayCard = <PlayingCard suit={card.suit} text={card.text} source={CardSource.CardStack}></PlayingCard>
+        const topCard = cards[cards.length - 1];
+        displayCards.push(<PlayingCard suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={1} key={crypto.randomUUID()}></PlayingCard>)
+    }
+    if (cards.length > 1) {
+        const topCard = cards[cards.length - 2];
+        displayCards.push(<PlayingCard suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={0} key={crypto.randomUUID()}></PlayingCard>)
     }
     return (
         <div className='card card-stack' ref={ref}>
             <div className="card-stack-inner">
-                {displayCard}
+                {displayCards}
             </div>
         </div>
     )

@@ -20,7 +20,8 @@ export interface CardProps {
     isDraggable?: boolean,
     onClick?: () => void,
     onRightClick?: (prop: CardProps) => void,
-    source: CardSource
+    source: CardSource,
+    zIndex?: number,
 }
 
 const facesByText = new Map([
@@ -48,7 +49,7 @@ function RenderFaceDownCard(onClick?: () => void) {
     )
 }
 
-function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = true, onRightClick, source }: CardProps) {
+function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = true, onRightClick, source, zIndex }: CardProps) {
     if (isFaceDown) {
         return RenderFaceDownCard(onClick);
     }
@@ -82,7 +83,7 @@ function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = tr
         <Fragment>
             <div className={cardClasses}
                 ref={itemRef}
-                style={{ opacity: state == 'dragging' ? 0 : 1 }}
+                style={{ opacity: state == 'dragging' ? 0 : 1, zIndex: zIndex ?? 0 }}
                 onClick={onClick}
                 onContextMenu={contextMenuEvent}>
                 <div className="card-header">
