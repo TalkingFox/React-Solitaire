@@ -40,24 +40,51 @@ function DeckStack() {
     const [lastThreeCards, setLastThreeCards] = useState<CardProps[]>([]);
 
     const drawThree = () => {
-        const newDeck = deck.slice(0)
-        const newPlayedCards = playedCards.slice(0);
+        let newDeck: CardProps[];
+        let newPile: CardProps[];
+        if (deck.length == 0) {
+            newDeck = playedCards.slice(0).reverse();
+            newPile = [];
+        }
+        else {
+            newDeck = deck.slice(0)
+            newPile = playedCards.slice(0);
+        }
 
         const poppedCards = [
             newDeck.pop(),
             newDeck.pop(),
             newDeck.pop()
         ].filter(x => x !== null && x !== undefined);
-        newPlayedCards.push(...poppedCards);
+        newPile.push(...poppedCards);
 
         setDeck(newDeck);
-        setPlayedCards(newPlayedCards);
-        setLastThreeCards(poppedCards);
+        setPlayedCards(newPile);
+        setLastThreeCards(
+            newPile.slice(Math.max(newPile.length - 3, 0))
+        );
     };
+
+    let deckElement: JSX.Element;
+    if (deck.length > 0) {
+        deckElement = <PlayingCard
+            suit={CardSuit.Hearts}
+            text="A"
+            isFaceDown={true}
+            onClick={drawThree}
+        />
+    }
+    else {
+        deckElement = <div className="card deck" onClick={drawThree}>
+            <div className="deck-outline">
+                <div className="deck-ring"></div>
+            </div>
+        </div>
+    }
 
     return (
         <div className="deck-stack">
-            <PlayingCard suit={CardSuit.Hearts} text="A" isFaceDown={true} onClick={drawThree} />
+            {deckElement}
             <DrawPile playedCards={lastThreeCards}></DrawPile>
         </div>
     )

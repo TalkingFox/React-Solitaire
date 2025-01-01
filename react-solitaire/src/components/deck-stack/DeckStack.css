@@ -3,3 +3,28 @@
     flex-direction: row;
     gap: 2vw;
 }
+
+.deck {
+    background-color: transparent !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.deck-outline {
+    width: 100%;
+    height: 100%;
+    border: solid rgb(255, 255, 255, 0.5) 3px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.deck-ring {
+    width: 50%;
+    height: 40%;
+    border: solid white 5px;
+    border-radius: 50px;
+}
