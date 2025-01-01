@@ -13,4 +13,10 @@
     height: 100%;
     border: solid rgb(255,255,255,0.5) 3px;
     border-radius: 5px;
+    display: grid;
+}
+
+.card-stack-inner > * {
+    margin-left: -6px;
+    margin-top: -6px;
 }

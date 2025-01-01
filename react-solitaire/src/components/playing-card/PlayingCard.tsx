@@ -1,4 +1,4 @@
-import { Fragment, RefObject, useRef } from 'react'
+import { Fragment, MouseEventHandler, RefObject, useRef } from 'react'
 import CardCenter from './card-center/CardCenter'
 import { GetSymbolAndColorFromSuit } from './CardSymbolGenerator'
 import './PlayingCard.css'
@@ -12,7 +12,8 @@ export interface CardProps {
     text: string,
     isFaceDown?: boolean,
     isDraggable?: boolean,
-    onClick?: () => void
+    onClick?: () => void,
+    onRightClick?: (prop: CardProps) => void
 }
 
 const facesByText = new Map([
@@ -40,7 +41,7 @@ function RenderFaceDownCard(onClick?: () => void) {
     )
 }
 
-function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = true }: CardProps) {
+function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = true, onRightClick }: CardProps) {
     if (isFaceDown) {
         return RenderFaceDownCard(onClick);
     }
@@ -61,6 +62,14 @@ function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = tr
         canDrop: () => false,
     });
 
+    const contextMenuEvent: MouseEventHandler = (event) => {
+        event.preventDefault();
+        if (onRightClick) {
+            console.log('[Playing Card] Card right-clicked.')
+            onRightClick({ suit, text })
+        }
+    };
+
     const castPreview = previewElement as RefObject<HTMLDivElement>;
 
     return (
@@ -68,7 +77,8 @@ function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = tr
             <div className={cardClasses}
                 ref={itemRef}
                 style={{ opacity: state == 'dragging' ? 0 : 1 }}
-                onClick={onClick}>
+                onClick={onClick}
+                onContextMenu={contextMenuEvent}>
                 <div className="card-header">
                     <span>{text}</span>
                     <span>{cardSymbol}</span>

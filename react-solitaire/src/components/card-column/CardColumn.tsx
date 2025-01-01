@@ -3,10 +3,11 @@ import PlayingCard, { CardProps } from '../playing-card/PlayingCard';
 import './CardColumn.css'
 
 export interface CardColumnProps {
-    cards: CardProps[]
+    cards: CardProps[],
+    cardRightClicked: (card: CardProps) => void
 }
 
-function CardColumn({ cards = [] }: CardColumnProps) {
+function CardColumn({ cards = [], cardRightClicked }: CardColumnProps) {
     return (
         <div className='card card-column'>
             <div className='card-column-ring'>
@@ -24,7 +25,9 @@ function CardColumn({ cards = [] }: CardColumnProps) {
                                         suit={card.suit}
                                         text={card.text}
                                         isFaceDown={isFaceDown}
-                                        isDraggable={!isFaceDown}>
+                                        isDraggable={!isFaceDown}
+                                        onRightClick={(index == cards.length - 1) ? cardRightClicked : undefined}
+                                    >
                                     </PlayingCard>
                                 </div>
                             )

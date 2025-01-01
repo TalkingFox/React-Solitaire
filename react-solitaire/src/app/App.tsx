@@ -1,11 +1,11 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
-import PlayingCard, { CardProps } from '../components/playing-card/PlayingCard.tsx'
+import { CardProps } from '../components/playing-card/PlayingCard.tsx'
 import { CardSuit } from '../shared/enums.ts';
 import DeckStack from '../components/deck-stack/DeckStack.tsx';
 import CardStack from '../components/card-stack/CardStack.tsx';
 import CardColumn from '../components/card-column/CardColumn.tsx';
-
+import { CARD_TEXT_BY_VALUE, CARD_VALUE_BY_TEXT } from '../shared/card-values.ts';
 
 function App() {
     useEffect(() => {
@@ -44,18 +44,68 @@ function App() {
         return fullDeck;
     }, []);
 
-    const cardColumns: CardProps[][] = [[], [], [], [], [], [], []]
-    for (let i = 0; i < cardColumns.length; i++) {
-        for (let j = 0; j + i < cardColumns.length; j++) {
-            const currentIndex = i + j;
-            const popCard = startingDeck.pop();
-            if (!popCard) {
-                continue
+    const startingColumns = useMemo<CardProps[][]>(() => {
+        let columns: CardProps[][] = [[], [], [], [], [], [], []]
+        for (let i = 0; i < columns.length; i++) {
+            for (let j = 0; j + i < columns.length; j++) {
+                const currentIndex = i + j;
+                const popCard = startingDeck.pop();
+                if (!popCard) {
+                    continue
+                }
+                columns[currentIndex].push(popCard);
             }
-            cardColumns[currentIndex].push(popCard);
         }
-    }
+        return columns;
+    }, []);
 
+    const [cardStacks, setCardStacks] = useState<CardProps[][]>([[], [], [], []]);
+    const [cardColumns, setCardColumns] = useState<CardProps[][]>(startingColumns);
+
+    const columnCardRightClicked = (card: CardProps, columnIndex: number) => {
+        let foundMatch: Boolean = false;
+        let stackMatch: CardProps[] = [];
+        // find appropriate stack
+        cardStacks.forEach((stack: CardProps[]) => {
+            if (stack.length > 0 && stack[0].suit == card.suit) {
+                stackMatch = stack;
+                foundMatch = true;
+                return;
+            }
+            if (stack.length == 0 && !foundMatch) {
+                stackMatch = stack;
+                foundMatch = true;
+            }
+        });
+
+        if (!foundMatch) {
+            // Shouldn't happen, but who knows, eh?
+            return;
+        }
+
+        // Check that the card belongs at the top of the stack.
+        let expectedValue: number = 0;
+        if (stackMatch.length == 0) {
+            expectedValue = 1
+        } else {
+            const cardToIncrement = stackMatch[stackMatch.length - 1];
+            expectedValue = CARD_VALUE_BY_TEXT[cardToIncrement.text] + 1
+        }
+
+        const expectedText = CARD_TEXT_BY_VALUE[expectedValue]
+        if (card.text != expectedText) {
+            return;
+        }
+
+        // Add card to stack
+        stackMatch.push(card);
+        setCardStacks(cardStacks);
+
+        // Remove card from column
+        const newColumns = cardColumns.slice(0);
+        newColumns[columnIndex].pop();
+        setCardColumns(newColumns);
+    };
 
     return (
         <>
@@ -63,21 +113,21 @@ function App() {
                 <DeckStack startingDeck={startingDeck} />
                 <div className="deck-spacer"></div>
                 <div className="card-stacks row">
-                    <CardStack ></CardStack>
-                    <CardStack ></CardStack>
-                    <CardStack ></CardStack>
-                    <CardStack ></CardStack>
+                    <CardStack cards={cardStacks[0]}></CardStack>
+                    <CardStack cards={cardStacks[1]}></CardStack>
+                    <CardStack cards={cardStacks[2]}></CardStack>
+                    <CardStack cards={cardStacks[3]}></CardStack>
                 </div>
             </div>
             <div>
                 <div className='card-columns'>
-                    <CardColumn cards={cardColumns[0]}></CardColumn>
-                    <CardColumn cards={cardColumns[1]}></CardColumn>
-                    <CardColumn cards={cardColumns[2]}></CardColumn>
-                    <CardColumn cards={cardColumns[3]}></CardColumn>
-                    <CardColumn cards={cardColumns[4]}></CardColumn>
-                    <CardColumn cards={cardColumns[5]}></CardColumn>
-                    <CardColumn cards={cardColumns[6]}></CardColumn>
+                    <CardColumn cards={cardColumns[0]} cardRightClicked={(card) => columnCardRightClicked(card, 0)}></CardColumn>
+                    <CardColumn cards={cardColumns[1]} cardRightClicked={(card) => columnCardRightClicked(card, 1)}></CardColumn>
+                    <CardColumn cards={cardColumns[2]} cardRightClicked={(card) => columnCardRightClicked(card, 2)}></CardColumn>
+                    <CardColumn cards={cardColumns[3]} cardRightClicked={(card) => columnCardRightClicked(card, 3)}></CardColumn>
+                    <CardColumn cards={cardColumns[4]} cardRightClicked={(card) => columnCardRightClicked(card, 4)}></CardColumn>
+                    <CardColumn cards={cardColumns[5]} cardRightClicked={(card) => columnCardRightClicked(card, 5)}></CardColumn>
+                    <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)}></CardColumn>
                 </div>
             </div>
         </>
