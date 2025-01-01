@@ -10,7 +10,8 @@ import { CardSuit } from '../../shared/enums'
 export interface CardProps {
     suit: CardSuit,
     text: string,
-    isFaceDown?: boolean
+    isFaceDown?: boolean,
+    isDraggable?: boolean,
     onClick?: () => void
 }
 
@@ -39,7 +40,7 @@ function RenderFaceDownCard(onClick?: () => void) {
     )
 }
 
-function PlayingCard({ suit, text, isFaceDown = false, onClick }: CardProps) {
+function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = true }: CardProps) {
     if (isFaceDown) {
         return RenderFaceDownCard(onClick);
     }
@@ -56,7 +57,7 @@ function PlayingCard({ suit, text, isFaceDown = false, onClick }: CardProps) {
         element: itemRef,
         getInitialData: () => ({ suit, text }),
         getData: () => ({ suit, text }),
-        canDrag: () => true,
+        canDrag: () => isDraggable,
         canDrop: () => false,
     });
 

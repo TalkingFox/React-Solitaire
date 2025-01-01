@@ -13,7 +13,10 @@ function DrawPile({ playedCards }: DrawPileProps) {
                     let className = `pile-card card-${index + 1}`;
                     return (
                         <div className={className} key={crypto.randomUUID()}>
-                            <PlayingCard suit={card.suit} text={card.text}></PlayingCard>
+                            <PlayingCard
+                                suit={card.suit}
+                                text={card.text}
+                                isDraggable={index == (playedCards.length - 1) ? true : false}></PlayingCard>
                         </div>
                     )
                 })
