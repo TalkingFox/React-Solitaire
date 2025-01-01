@@ -27,25 +27,25 @@ function CardCenter({ symbol, face, numberOfElements }: CardFace) {
     switch (numberOfElements) {
         case 2:
         case 3:
-            columns.push({ class: 'card-column', elementCount: numberOfElements })
+            columns.push({ class: 'card-symbol-column', elementCount: numberOfElements })
             break;
         case 4:
         case 6:
-            columns.push({ class: 'card-column', elementCount: numberOfElements / 2 });
-            columns.push({ class: 'card-column', elementCount: numberOfElements / 2 });
+            columns.push({ class: 'card-symbol-column', elementCount: numberOfElements / 2 });
+            columns.push({ class: 'card-symbol-column', elementCount: numberOfElements / 2 });
             break;
         case 5:
         case 7:
         case 9:
-            columns.push({ class: 'card-column', elementCount: Math.floor(numberOfElements / 2), elementClass: 'card-symbol-rotated', applyClassToSecondHalf: true })
-            columns.push({ class: 'card-column card-column--centered', elementCount: 1 })
-            columns.push({ class: 'card-column', elementCount: Math.floor(numberOfElements / 2), elementClass: 'card-symbol-rotated', applyClassToSecondHalf: true })
+            columns.push({ class: 'card-symbol-column', elementCount: Math.floor(numberOfElements / 2), elementClass: 'card-symbol-rotated', applyClassToSecondHalf: true })
+            columns.push({ class: 'card-symbol-column card-symbol-column--centered', elementCount: 1 })
+            columns.push({ class: 'card-symbol-column', elementCount: Math.floor(numberOfElements / 2), elementClass: 'card-symbol-rotated', applyClassToSecondHalf: true })
             break;
         case 8:
         case 10:
-            columns.push({ class: 'card-column', elementCount: Math.floor((numberOfElements - 1) / 2), elementClass: 'card-symbol-rotated', applyClassToSecondHalf: true })
-            columns.push({ class: 'card-column card-column--centered', elementCount: 2, elementClass: 'card-symbol-big' })
-            columns.push({ class: 'card-column', elementCount: Math.floor((numberOfElements - 1) / 2), elementClass: 'card-symbol-rotated', applyClassToSecondHalf: true })
+            columns.push({ class: 'card-symbol-column', elementCount: Math.floor((numberOfElements - 1) / 2), elementClass: 'card-symbol-rotated', applyClassToSecondHalf: true })
+            columns.push({ class: 'card-symbol-column card-symbol-column--centered', elementCount: 2, elementClass: 'card-symbol-big' })
+            columns.push({ class: 'card-symbol-column', elementCount: Math.floor((numberOfElements - 1) / 2), elementClass: 'card-symbol-rotated', applyClassToSecondHalf: true })
             break;
     }
 

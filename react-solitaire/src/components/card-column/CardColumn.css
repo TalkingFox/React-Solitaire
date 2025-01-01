@@ -1,0 +1,26 @@
+.card-column {
+    background-color: transparent !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.card-column-ring {
+    border: solid rgb(255, 255, 255, 0.5) 3px;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    display: grid;
+}
+
+.card-column-card-container {
+    margin-left: -6px;
+    margin-top: -6px;
+    display: grid;
+}
+
+.card-column-card {
+    grid-row: 1;
+    grid-column: 1;
+}
