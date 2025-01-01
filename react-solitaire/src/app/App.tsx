@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Ref, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
-import { CardProps } from '../components/playing-card/PlayingCard.tsx'
+import { CardProps, CardSource } from '../components/playing-card/PlayingCard.tsx'
 import { CardSuit } from '../shared/enums.ts';
-import DeckStack from '../components/deck-stack/DeckStack.tsx';
+import DeckStack, { PopDeckHandle } from '../components/deck-stack/DeckStack.tsx';
 import CardStack from '../components/card-stack/CardStack.tsx';
 import CardColumn from '../components/card-column/CardColumn.tsx';
 import { CARD_TEXT_BY_VALUE, CARD_VALUE_BY_TEXT } from '../shared/card-values.ts';
@@ -29,7 +29,8 @@ function App() {
             return texts.map(text => {
                 let prop: CardProps = {
                     suit: suit,
-                    text: text
+                    text: text,
+                    source: CardSource.DrawPile
                 };
                 return prop
             });
@@ -62,12 +63,14 @@ function App() {
     const [cardStacks, setCardStacks] = useState<CardProps[][]>([[], [], [], []]);
     const [cardColumns, setCardColumns] = useState<CardProps[][]>(startingColumns);
 
-    const canSendCardToStack: (card: CardProps) => [boolean, CardProps[] | null] = (card: CardProps) => {
+    const deckRef = useRef<PopDeckHandle>(null);
+
+    const canSendCardToStack: (card: CardProps, stacks?: CardProps[][]) => [boolean, CardProps[] | null] = (card: CardProps, stacks: CardProps[][] = cardStacks) => {
         let foundMatch: Boolean = false;
         let stackMatch: CardProps[] = [];
 
         // find appropriate stack
-        cardStacks.forEach((stack: CardProps[]) => {
+        stacks.forEach((stack: CardProps[]) => {
             if (stack.length > 0 && stack[0].suit == card.suit) {
                 stackMatch = stack;
                 foundMatch = true;
@@ -132,16 +135,65 @@ function App() {
         return true;
     };
 
+    function onStackCardDrop(card: CardProps, stackIndex: number) {
+        const stack = cardStacks[stackIndex];
+        const [canSendCard, _] = canSendCardToStack(card, [stack]);
+        if (!canSendCard) {
+            return;
+        }
+
+        // Add card to stack
+        const newStacks = cardStacks.splice(0);
+
+        // find card's source and remove it.
+        if (card.source == CardSource.DrawPile) {
+            if (deckRef.current != null) {
+                deckRef.current.popPile();
+            }
+        }
+        else if (card.source == CardSource.CardColumn) {
+            const newColumns = cardColumns.splice(0);
+            for (let i = 0; i < newColumns.length; i++) {
+                const column = newColumns[i];
+                if (column.length == 0) {
+                    continue
+                }
+                const topCard = column[column.length - 1];
+                if (card.suit == topCard.suit && card.text == topCard.text) {
+                    column.pop();
+                    setCardColumns(newColumns);
+                    break;
+                }
+            }
+        }
+        else if (card.source == CardSource.CardStack) {
+            for (let i = 0; i < newStacks.length; i++) {
+                const stack = newStacks[i];
+                if (stack.length == 0) {
+                    continue;
+                }
+                const topCard = stack[stack.length - 1];
+                if (card.suit == topCard.suit && card.text == topCard.text) {
+                    stack.pop();
+                    setCardStacks(newStacks);
+                    break;
+                }
+            }
+        }
+        stack.push(card);
+        setCardStacks(newStacks);
+    };
+
     return (
         <>
             <div className="top-row">
-                <DeckStack startingDeck={startingDeck} trySendCardToStack={trySendDeckCardFromDeck}/>
+                <DeckStack startingDeck={startingDeck} trySendCardToStack={trySendDeckCardFromDeck} ref={deckRef} />
                 <div className="deck-spacer"></div>
                 <div className="card-stacks row">
-                    <CardStack cards={cardStacks[0]}></CardStack>
-                    <CardStack cards={cardStacks[1]}></CardStack>
-                    <CardStack cards={cardStacks[2]}></CardStack>
-                    <CardStack cards={cardStacks[3]}></CardStack>
+                    <CardStack cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
+                    <CardStack cards={cardStacks[1]} onCardDropped={(card) => onStackCardDrop(card, 1)}></CardStack>
+                    <CardStack cards={cardStacks[2]} onCardDropped={(card) => onStackCardDrop(card, 2)}></CardStack>
+                    <CardStack cards={cardStacks[3]} onCardDropped={(card) => onStackCardDrop(card, 3)}></CardStack>
                 </div>
             </div>
             <div>

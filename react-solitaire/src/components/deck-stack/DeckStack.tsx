@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { CardSuit } from "../../shared/enums"
-import PlayingCard, { CardProps } from "../playing-card/PlayingCard";
+import PlayingCard, { CardProps, CardSource } from "../playing-card/PlayingCard";
 import './DeckStack.css'
 import DrawPile from "./draw-pile/DrawPile";
 
@@ -9,11 +9,27 @@ export interface DeckStackProps {
     trySendCardToStack: (card: CardProps) => boolean
 }
 
-function DeckStack({ startingDeck, trySendCardToStack }: DeckStackProps) {
+export type PopDeckHandle = {
+    popPile: () => void
+};
 
+const DeckStack = forwardRef(function DeckStack({ startingDeck, trySendCardToStack }: DeckStackProps, ref: React.ForwardedRef<unknown>) {
     const [deck, setDeck] = useState<CardProps[]>(startingDeck);
     const [playedCards, setPlayedCards] = useState<CardProps[]>([]);
     const [lastThreeCards, setLastThreeCards] = useState<CardProps[]>([]);
+
+    useImperativeHandle(ref, () => {
+        return {
+            popPile() {
+                const newPile = playedCards.splice(0);
+                newPile.pop();
+                setPlayedCards(newPile);
+                setLastThreeCards(
+                    newPile.slice(Math.max(newPile.length - 3, 0))
+                );
+            }
+        }
+    })
 
     const drawThree = () => {
         let newDeck: CardProps[];
@@ -61,6 +77,7 @@ function DeckStack({ startingDeck, trySendCardToStack }: DeckStackProps) {
             text="A"
             isFaceDown={true}
             onClick={drawThree}
+            source={CardSource.DrawPile}
         />
     }
     else {
@@ -77,6 +94,6 @@ function DeckStack({ startingDeck, trySendCardToStack }: DeckStackProps) {
             <DrawPile playedCards={lastThreeCards} cardRightClicked={pileCardRightClicked}></DrawPile>
         </div>
     )
-}
+})
 
 export default DeckStack;

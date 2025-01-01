@@ -1,5 +1,5 @@
 import { CSSProperties } from 'react';
-import PlayingCard, { CardProps } from '../playing-card/PlayingCard';
+import PlayingCard, { CardProps, CardSource } from '../playing-card/PlayingCard';
 import './CardColumn.css'
 
 export interface CardColumnProps {
@@ -27,6 +27,7 @@ function CardColumn({ cards = [], cardRightClicked }: CardColumnProps) {
                                         isFaceDown={isFaceDown}
                                         isDraggable={!isFaceDown}
                                         onRightClick={(index == cards.length - 1) ? cardRightClicked : undefined}
+                                        source={CardSource.CardColumn}
                                     >
                                     </PlayingCard>
                                 </div>

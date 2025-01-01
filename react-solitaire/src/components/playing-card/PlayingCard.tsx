@@ -7,13 +7,20 @@ import { createPortal } from 'react-dom'
 import { previewStyles } from '../../shared/style'
 import { CardSuit } from '../../shared/enums'
 
+export enum CardSource {
+    CardColumn,
+    DrawPile,
+    CardStack
+}
+
 export interface CardProps {
     suit: CardSuit,
     text: string,
     isFaceDown?: boolean,
     isDraggable?: boolean,
     onClick?: () => void,
-    onRightClick?: (prop: CardProps) => void
+    onRightClick?: (prop: CardProps) => void,
+    source: CardSource
 }
 
 const facesByText = new Map([
@@ -41,7 +48,7 @@ function RenderFaceDownCard(onClick?: () => void) {
     )
 }
 
-function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = true, onRightClick }: CardProps) {
+function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = true, onRightClick, source }: CardProps) {
     if (isFaceDown) {
         return RenderFaceDownCard(onClick);
     }
@@ -56,17 +63,16 @@ function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = tr
     const itemRef = useRef<HTMLDivElement>(null);
     const { state, preview, previewElement } = useDraggable({
         element: itemRef,
-        getInitialData: () => ({ suit, text }),
-        getData: () => ({ suit, text }),
+        getInitialData: () => ({ suit, text, source }),
+        getData: () => ({ suit, text, source }),
         canDrag: () => isDraggable,
-        canDrop: () => false,
+        canDrop: () => false
     });
 
     const contextMenuEvent: MouseEventHandler = (event) => {
         event.preventDefault();
         if (onRightClick) {
-            console.log('[Playing Card] Card right-clicked.')
-            onRightClick({ suit, text })
+            onRightClick({ suit, text, source })
         }
     };
 
