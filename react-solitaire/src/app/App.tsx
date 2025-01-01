@@ -62,15 +62,16 @@ function App() {
     const [cardStacks, setCardStacks] = useState<CardProps[][]>([[], [], [], []]);
     const [cardColumns, setCardColumns] = useState<CardProps[][]>(startingColumns);
 
-    const columnCardRightClicked = (card: CardProps, columnIndex: number) => {
+    const canSendCardToStack: (card: CardProps) => [boolean, CardProps[] | null] = (card: CardProps) => {
         let foundMatch: Boolean = false;
         let stackMatch: CardProps[] = [];
+
         // find appropriate stack
         cardStacks.forEach((stack: CardProps[]) => {
             if (stack.length > 0 && stack[0].suit == card.suit) {
                 stackMatch = stack;
                 foundMatch = true;
-                return;
+                return [false, null];
             }
             if (stack.length == 0 && !foundMatch) {
                 stackMatch = stack;
@@ -80,7 +81,7 @@ function App() {
 
         if (!foundMatch) {
             // Shouldn't happen, but who knows, eh?
-            return;
+            return [false, null];
         }
 
         // Check that the card belongs at the top of the stack.
@@ -93,13 +94,22 @@ function App() {
         }
 
         const expectedText = CARD_TEXT_BY_VALUE[expectedValue]
-        if (card.text != expectedText) {
+        if (card.text == expectedText) {
+            return [true, stackMatch]
+        }
+        return [false, null]
+    }
+
+    const columnCardRightClicked = (card: CardProps, columnIndex: number) => {
+        const [canSendCard, matchingStack] = canSendCardToStack(card);
+        if (!canSendCard || !matchingStack) {
             return;
         }
 
         // Add card to stack
-        stackMatch.push(card);
-        setCardStacks(cardStacks);
+        const newStacks = cardStacks.splice(0);
+        matchingStack.push(card);
+        setCardStacks(newStacks);
 
         // Remove card from column
         const newColumns = cardColumns.slice(0);
@@ -107,10 +117,25 @@ function App() {
         setCardColumns(newColumns);
     };
 
+    const trySendDeckCardFromDeck = (card: CardProps) => {
+        const [canSendCard, matchingStack] = canSendCardToStack(card);
+        if (!canSendCard || !matchingStack) {
+            return false;
+        }
+
+        // Add card to stack
+        const newStacks = cardStacks.splice(0);
+        matchingStack.push(card);
+        setCardStacks(newStacks);
+
+        // Remove card from deck
+        return true;
+    };
+
     return (
         <>
             <div className="top-row">
-                <DeckStack startingDeck={startingDeck} />
+                <DeckStack startingDeck={startingDeck} trySendCardToStack={trySendDeckCardFromDeck}/>
                 <div className="deck-spacer"></div>
                 <div className="card-stacks row">
                     <CardStack cards={cardStacks[0]}></CardStack>

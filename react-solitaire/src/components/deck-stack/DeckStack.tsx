@@ -5,10 +5,11 @@ import './DeckStack.css'
 import DrawPile from "./draw-pile/DrawPile";
 
 export interface DeckStackProps {
-    startingDeck: CardProps[]
+    startingDeck: CardProps[],
+    trySendCardToStack: (card: CardProps) => boolean
 }
 
-function DeckStack({ startingDeck }: DeckStackProps) {
+function DeckStack({ startingDeck, trySendCardToStack }: DeckStackProps) {
 
     const [deck, setDeck] = useState<CardProps[]>(startingDeck);
     const [playedCards, setPlayedCards] = useState<CardProps[]>([]);
@@ -40,6 +41,19 @@ function DeckStack({ startingDeck }: DeckStackProps) {
         );
     };
 
+    const pileCardRightClicked = () => {
+        const card = lastThreeCards[lastThreeCards.length - 1];
+        if (!trySendCardToStack(card)) {
+            return;
+        }
+
+        const newPile = playedCards.splice(0);
+        newPile.pop();
+        const newLastThree = newPile.slice(Math.max(newPile.length - 3, 0));
+        setPlayedCards(newPile);
+        setLastThreeCards(newLastThree);
+    };
+
     let deckElement: JSX.Element;
     if (deck.length > 0) {
         deckElement = <PlayingCard
@@ -60,7 +74,7 @@ function DeckStack({ startingDeck }: DeckStackProps) {
     return (
         <div className="deck-stack">
             {deckElement}
-            <DrawPile playedCards={lastThreeCards}></DrawPile>
+            <DrawPile playedCards={lastThreeCards} cardRightClicked={pileCardRightClicked}></DrawPile>
         </div>
     )
 }
