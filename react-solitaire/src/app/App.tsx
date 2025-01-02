@@ -125,7 +125,9 @@ function App() {
         const newColumns = cardColumns.slice(0);
         const newColumn = newColumns[columnIndex];
         newColumn.pop();
-        newColumn[newColumn.length - 1].isFaceDown = false;
+        if (newColumn.length > 0) {
+            newColumn[newColumn.length - 1].isFaceDown = false;
+        }
         setCardColumns(newColumns);
     };
 
@@ -170,7 +172,9 @@ function App() {
                 const topCard = column[column.length - 1];
                 if (card.suit == topCard.suit && card.text == topCard.text) {
                     column.pop();
-                    column[column.length - 1].isFaceDown = false;
+                    if (column.length > 0) {
+                        column[column.length - 1].isFaceDown = false;
+                    }
                     setCardColumns(newColumns);
                     break;
                 }
@@ -237,7 +241,9 @@ function App() {
                 const topCard = column[column.length - 1];
                 if (card.suit == topCard.suit && card.text == topCard.text) {
                     column.pop();
-                    column[column.length - 1].isFaceDown = false;
+                    if (column.length > 0) {
+                        column[column.length - 1].isFaceDown = false;
+                    }
                     break;
                 }
             }
