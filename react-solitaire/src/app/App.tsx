@@ -57,6 +57,13 @@ function App() {
                 columns[currentIndex].push(popCard);
             }
         }
+
+        columns.forEach((column) => {
+            if (column.length == 0) {
+                return;
+            }
+            column[column.length - 1].isFaceDown = false;
+        });
         return columns;
     }, []);
 
@@ -116,7 +123,9 @@ function App() {
 
         // Remove card from column
         const newColumns = cardColumns.slice(0);
-        newColumns[columnIndex].pop();
+        const newColumn = newColumns[columnIndex];
+        newColumn.pop();
+        newColumn[newColumn.length - 1].isFaceDown = false;
         setCardColumns(newColumns);
     };
 
@@ -161,6 +170,7 @@ function App() {
                 const topCard = column[column.length - 1];
                 if (card.suit == topCard.suit && card.text == topCard.text) {
                     column.pop();
+                    column[column.length - 1].isFaceDown = false;
                     setCardColumns(newColumns);
                     break;
                 }
@@ -184,6 +194,72 @@ function App() {
         setCardStacks(newStacks);
     };
 
+    function onColumnCardDrop(card: CardProps, columnIndex: number) {
+        const column = cardColumns[columnIndex];
+        const topCard = column[column.length - 1];
+
+        let expectedValue = CARD_VALUE_BY_TEXT['K'];
+        if (column.length > 0) {
+
+            // check if card can be dropped on the column.
+            // Must follow alternating suit and descending value rules.
+            const isCardRed = card.suit in [CardSuit.Diamonds, CardSuit.Hearts];
+            const isTopCardRed = topCard.suit in [CardSuit.Diamonds, CardSuit.Hearts];
+            if (isCardRed == isTopCardRed) {
+                return;
+            }
+
+            const topCardValue = CARD_VALUE_BY_TEXT[topCard.text];
+            expectedValue = topCardValue - 1;
+        }
+
+        const expectedText = CARD_TEXT_BY_VALUE[expectedValue];
+        if (card.text != expectedText) {
+            return;
+        }
+
+        // Add card to stack
+        const newColumns = cardColumns.splice(0);
+        card.isFaceDown = false;
+
+        // find card's source and remove it.
+        if (card.source == CardSource.DrawPile) {
+            if (deckRef.current != null) {
+                deckRef.current.popPile();
+            }
+        }
+        else if (card.source == CardSource.CardColumn) {
+            for (let i = 0; i < newColumns.length; i++) {
+                const column = newColumns[i];
+                if (column.length == 0) {
+                    continue
+                }
+                const topCard = column[column.length - 1];
+                if (card.suit == topCard.suit && card.text == topCard.text) {
+                    column.pop();
+                    column[column.length - 1].isFaceDown = false;
+                    break;
+                }
+            }
+        }
+        else if (card.source == CardSource.CardStack) {
+            for (let i = 0; i < newColumns.length; i++) {
+                const stack = newColumns[i];
+                if (stack.length == 0) {
+                    continue;
+                }
+                const topCard = stack[stack.length - 1];
+                if (card.suit == topCard.suit && card.text == topCard.text) {
+                    stack.pop();
+                    setCardStacks(newColumns);
+                    break;
+                }
+            }
+        }
+        column.push(card);
+        setCardColumns(newColumns);
+    };
+
     return (
         <>
             <div className="top-row">
@@ -198,13 +274,13 @@ function App() {
             </div>
             <div>
                 <div className='card-columns'>
-                    <CardColumn cards={cardColumns[0]} cardRightClicked={(card) => columnCardRightClicked(card, 0)}></CardColumn>
-                    <CardColumn cards={cardColumns[1]} cardRightClicked={(card) => columnCardRightClicked(card, 1)}></CardColumn>
-                    <CardColumn cards={cardColumns[2]} cardRightClicked={(card) => columnCardRightClicked(card, 2)}></CardColumn>
-                    <CardColumn cards={cardColumns[3]} cardRightClicked={(card) => columnCardRightClicked(card, 3)}></CardColumn>
-                    <CardColumn cards={cardColumns[4]} cardRightClicked={(card) => columnCardRightClicked(card, 4)}></CardColumn>
-                    <CardColumn cards={cardColumns[5]} cardRightClicked={(card) => columnCardRightClicked(card, 5)}></CardColumn>
-                    <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)}></CardColumn>
+                    <CardColumn cards={cardColumns[0]} cardRightClicked={(card) => columnCardRightClicked(card, 0)} onCardDropped={(card) => onColumnCardDrop(card, 0)}></CardColumn>
+                    <CardColumn cards={cardColumns[1]} cardRightClicked={(card) => columnCardRightClicked(card, 1)} onCardDropped={(card) => onColumnCardDrop(card, 1)}></CardColumn>
+                    <CardColumn cards={cardColumns[2]} cardRightClicked={(card) => columnCardRightClicked(card, 2)} onCardDropped={(card) => onColumnCardDrop(card, 2)}></CardColumn>
+                    <CardColumn cards={cardColumns[3]} cardRightClicked={(card) => columnCardRightClicked(card, 3)} onCardDropped={(card) => onColumnCardDrop(card, 3)}></CardColumn>
+                    <CardColumn cards={cardColumns[4]} cardRightClicked={(card) => columnCardRightClicked(card, 4)} onCardDropped={(card) => onColumnCardDrop(card, 4)}></CardColumn>
+                    <CardColumn cards={cardColumns[5]} cardRightClicked={(card) => columnCardRightClicked(card, 5)} onCardDropped={(card) => onColumnCardDrop(card, 5)}></CardColumn>
+                    <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                 </div>
             </div>
         </>

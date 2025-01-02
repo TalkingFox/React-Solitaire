@@ -1,21 +1,38 @@
-import { CSSProperties } from 'react';
+import { CSSProperties, useEffect, useRef } from 'react';
 import PlayingCard, { CardProps, CardSource } from '../playing-card/PlayingCard';
 import './CardColumn.css'
+import invariant from 'tiny-invariant';
+import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
 export interface CardColumnProps {
     cards: CardProps[],
-    cardRightClicked: (card: CardProps) => void
+    cardRightClicked: (card: CardProps) => void,
+    onCardDropped: (card: CardProps) => void;
 }
 
-function CardColumn({ cards = [], cardRightClicked }: CardColumnProps) {
+function CardColumn({ cards = [], cardRightClicked, onCardDropped }: CardColumnProps) {
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const el = ref.current;
+        invariant(el);
+
+        return dropTargetForElements({
+            element: el,
+            onDrop: ({ source }) => {
+                const card = (source.data as unknown) as CardProps;
+                onCardDropped(card);
+            }
+        });
+    });
+
     return (
-        <div className='card card-column'>
+        <div className='card card-column' ref={ref}>
             <div className='card-column-ring'>
                 <div className='card-column-card-container'>
                     {
                         cards.map((card, index) => {
                             const className = `card-column-card`;
-                            const isFaceDown = index == cards.length - 1 ? false : true;
                             return (
                                 <div
                                     className={className}
@@ -24,8 +41,8 @@ function CardColumn({ cards = [], cardRightClicked }: CardColumnProps) {
                                     <PlayingCard
                                         suit={card.suit}
                                         text={card.text}
-                                        isFaceDown={isFaceDown}
-                                        isDraggable={!isFaceDown}
+                                        isFaceDown={card.isFaceDown ?? true}
+                                        isDraggable={!(card.isFaceDown ?? true)}
                                         onRightClick={(index == cards.length - 1) ? cardRightClicked : undefined}
                                         source={CardSource.CardColumn}
                                     >
