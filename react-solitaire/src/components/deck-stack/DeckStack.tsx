@@ -21,7 +21,7 @@ const DeckStack = forwardRef(function DeckStack({ startingDeck, trySendCardToSta
     useImperativeHandle(ref, () => {
         return {
             popPile() {
-                const newPile = playedCards.splice(0);
+                const newPile = playedCards.slice(0);
                 newPile.pop();
                 setPlayedCards(newPile);
                 setLastThreeCards(
@@ -63,7 +63,7 @@ const DeckStack = forwardRef(function DeckStack({ startingDeck, trySendCardToSta
             return;
         }
 
-        const newPile = playedCards.splice(0);
+        const newPile = playedCards.slice(0);
         newPile.pop();
         const newLastThree = newPile.slice(Math.max(newPile.length - 3, 0));
         setPlayedCards(newPile);

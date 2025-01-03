@@ -1,4 +1,4 @@
-import { Ref, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { CardProps, CardSource } from '../components/playing-card/PlayingCard.tsx'
 import { CardSuit } from '../shared/enums.ts';
@@ -30,7 +30,8 @@ function App() {
                 let prop: CardProps = {
                     suit: suit,
                     text: text,
-                    source: CardSource.DrawPile
+                    source: CardSource.DrawPile,
+                    children: []
                 };
                 return prop
             });
@@ -54,6 +55,7 @@ function App() {
                 if (!popCard) {
                     continue
                 }
+                popCard.source = CardSource.CardColumn;
                 columns[currentIndex].push(popCard);
             }
         }
@@ -117,7 +119,7 @@ function App() {
         }
 
         // Add card to stack
-        const newStacks = cardStacks.splice(0);
+        const newStacks = cardStacks.slice(0);
         matchingStack.push(card);
         setCardStacks(newStacks);
 
@@ -138,7 +140,7 @@ function App() {
         }
 
         // Add card to stack
-        const newStacks = cardStacks.splice(0);
+        const newStacks = cardStacks.slice(0);
         matchingStack.push(card);
         setCardStacks(newStacks);
 
@@ -147,6 +149,10 @@ function App() {
     };
 
     function onStackCardDrop(card: CardProps, stackIndex: number) {
+        if ((card.children ?? []).length > 0) {
+            return;
+        }
+
         const stack = cardStacks[stackIndex];
         const [canSendCard, _] = canSendCardToStack(card, [stack]);
         if (!canSendCard) {
@@ -154,7 +160,7 @@ function App() {
         }
 
         // Add card to stack
-        const newStacks = cardStacks.splice(0);
+        const newStacks = cardStacks.slice(0);
 
         // find card's source and remove it.
         if (card.source == CardSource.DrawPile) {
@@ -163,7 +169,7 @@ function App() {
             }
         }
         else if (card.source == CardSource.CardColumn) {
-            const newColumns = cardColumns.splice(0);
+            const newColumns = cardColumns.slice(0);
             for (let i = 0; i < newColumns.length; i++) {
                 const column = newColumns[i];
                 if (column.length == 0) {
@@ -194,6 +200,7 @@ function App() {
                 }
             }
         }
+        card.source = CardSource.CardStack;
         stack.push(card);
         setCardStacks(newStacks);
     };
@@ -223,7 +230,7 @@ function App() {
         }
 
         // Add card to stack
-        const newColumns = cardColumns.splice(0);
+        const newColumns = cardColumns.slice(0);
         card.isFaceDown = false;
 
         // find card's source and remove it.
@@ -233,14 +240,23 @@ function App() {
             }
         }
         else if (card.source == CardSource.CardColumn) {
+            let sourceTopCard = card;
+            const childCards = card.children ?? [];
+            let cardsToPop = 1 + childCards.length;
+
+            if (childCards.length > 0) {
+                sourceTopCard = childCards[childCards.length - 1];
+            }
             for (let i = 0; i < newColumns.length; i++) {
                 const column = newColumns[i];
                 if (column.length == 0) {
                     continue
                 }
                 const topCard = column[column.length - 1];
-                if (card.suit == topCard.suit && card.text == topCard.text) {
-                    column.pop();
+                if (sourceTopCard.suit == topCard.suit && sourceTopCard.text == topCard.text) {
+                    for (let j = 0; j < cardsToPop; j++) {
+                        column.pop();
+                    }
                     if (column.length > 0) {
                         column[column.length - 1].isFaceDown = false;
                     }
@@ -249,20 +265,28 @@ function App() {
             }
         }
         else if (card.source == CardSource.CardStack) {
-            for (let i = 0; i < newColumns.length; i++) {
-                const stack = newColumns[i];
+            const newStacks = cardStacks.slice(0);
+            for (let i = 0; i < newStacks.length; i++) {
+                const stack = newStacks[i];
                 if (stack.length == 0) {
                     continue;
                 }
                 const topCard = stack[stack.length - 1];
                 if (card.suit == topCard.suit && card.text == topCard.text) {
                     stack.pop();
-                    setCardStacks(newColumns);
+                    setCardStacks(newStacks);
                     break;
                 }
             }
         }
-        column.push(card);
+        card.source = CardSource.CardColumn
+        column.push(card)
+        if (card.children) {
+            card.children.forEach((childCard) => {
+                childCard.source = CardSource.CardColumn;
+                column.push(childCard);
+            });
+        }
         setCardColumns(newColumns);
     };
 

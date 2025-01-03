@@ -22,6 +22,8 @@ export interface CardProps {
     onRightClick?: (prop: CardProps) => void,
     source: CardSource,
     zIndex?: number,
+    children?: CardProps[],
+    isDragging?: boolean
 }
 
 const facesByText = new Map([
@@ -49,7 +51,7 @@ function RenderFaceDownCard(onClick?: () => void) {
     )
 }
 
-function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = true, onRightClick, source, zIndex }: CardProps) {
+function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = true, onRightClick, source, zIndex, children = [], isDragging = false }: CardProps) {
     if (isFaceDown) {
         return RenderFaceDownCard(onClick);
     }
@@ -64,41 +66,59 @@ function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = tr
     const itemRef = useRef<HTMLDivElement>(null);
     const { state, preview, previewElement } = useDraggable({
         element: itemRef,
-        getInitialData: () => ({ suit, text, source }),
-        getData: () => ({ suit, text, source }),
+        getInitialData: () => ({ suit, text, source, children }),
+        getData: () => ({ suit, text, source, children }),
         canDrag: () => isDraggable,
         canDrop: () => false
     });
 
     const contextMenuEvent: MouseEventHandler = (event) => {
         event.preventDefault();
+        if (children.length > 0) {
+            return;
+        }
         if (onRightClick) {
-            onRightClick({ suit, text, source })
+            onRightClick({ suit, text, source, children })
         }
     };
 
     const castPreview = previewElement as RefObject<HTMLDivElement>;
+    let child: JSX.Element | undefined = undefined;
+    let childPreview: JSX.Element | undefined = undefined;
+
+    if (children.length > 0) {
+        const grandChildren = children.slice(0);
+        const childProps = grandChildren.shift() as CardProps;
+        child = <PlayingCard
+            suit={childProps.suit}
+            text={childProps.text}
+            children={grandChildren}
+            source={childProps.source}
+            isDraggable={childProps.isDraggable}
+            isFaceDown={childProps.isFaceDown}
+            onClick={onClick}
+            onRightClick={onRightClick}
+            zIndex={childProps.zIndex}
+            isDragging={(state == 'dragging' || isDragging)}>
+        </PlayingCard>
+
+        childPreview = <PlayingCard
+            suit={childProps.suit}
+            text={childProps.text}
+            children={grandChildren}
+            source={childProps.source}
+            zIndex={childProps.zIndex}>
+        </PlayingCard>
+    }
 
     return (
         <Fragment>
-            <div className={cardClasses}
-                ref={itemRef}
-                style={{ opacity: state == 'dragging' ? 0 : 1, zIndex: zIndex ?? 0 }}
-                onClick={onClick}
-                onContextMenu={contextMenuEvent}>
-                <div className="card-header">
-                    <span>{text}</span>
-                    <span>{cardSymbol}</span>
-                </div>
-                <CardCenter symbol={cardSymbol} numberOfElements={numberOfElements} face={cardFace} />
-                <div className="card-footer">
-                    <span>{cardSymbol}</span>
-                    <span>{text}</span>
-                </div>
-            </div>
-
-            {preview && createPortal(
-                <div className={cardClasses} ref={castPreview} style={previewStyles(preview) as React.CSSProperties} >
+            <div className='card-parent'>
+                <div className={cardClasses}
+                    ref={itemRef}
+                    style={{ opacity: (state == 'dragging' || isDragging) ? 0 : 1, zIndex: zIndex ?? 0 }}
+                    onClick={onClick}
+                    onContextMenu={contextMenuEvent}>
                     <div className="card-header">
                         <span>{text}</span>
                         <span>{cardSymbol}</span>
@@ -108,6 +128,24 @@ function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = tr
                         <span>{cardSymbol}</span>
                         <span>{text}</span>
                     </div>
+                </div>
+                {child}
+            </div>
+
+            {preview && createPortal(
+                <div className='card-parent' ref={castPreview} style={previewStyles(preview) as React.CSSProperties}>
+                    <div className={cardClasses} >
+                        <div className="card-header">
+                            <span>{text}</span>
+                            <span>{cardSymbol}</span>
+                        </div>
+                        <CardCenter symbol={cardSymbol} numberOfElements={numberOfElements} face={cardFace} />
+                        <div className="card-footer">
+                            <span>{cardSymbol}</span>
+                            <span>{text}</span>
+                        </div>
+                    </div>
+                    {childPreview}
                 </div>, document.body
             )}
         </Fragment>

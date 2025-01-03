@@ -26,12 +26,22 @@ function CardColumn({ cards = [], cardRightClicked, onCardDropped }: CardColumnP
         });
     });
 
+    // Merge all face-up cards into a single card with children
+    let newCards: CardProps[] = cards;
+    const startingIndex = cards.findIndex((card) => !(card.isFaceDown ?? true));
+    if (startingIndex >= 0) {
+        newCards = cards.slice(0, startingIndex);
+        const parentCard = cards[startingIndex]
+        parentCard.children = cards.slice(startingIndex + 1);
+        newCards.push(parentCard);
+    }
+
     return (
         <div className='card card-column' ref={ref}>
             <div className='card-column-ring'>
                 <div className='card-column-card-container'>
                     {
-                        cards.map((card, index) => {
+                        newCards.map((card, index) => {
                             const className = `card-column-card`;
                             return (
                                 <div
@@ -43,8 +53,9 @@ function CardColumn({ cards = [], cardRightClicked, onCardDropped }: CardColumnP
                                         text={card.text}
                                         isFaceDown={card.isFaceDown ?? true}
                                         isDraggable={!(card.isFaceDown ?? true)}
-                                        onRightClick={(index == cards.length - 1) ? cardRightClicked : undefined}
+                                        onRightClick={(index == newCards.length - 1) ? cardRightClicked : undefined}
                                         source={CardSource.CardColumn}
+                                        children={card.children}
                                     >
                                     </PlayingCard>
                                 </div>

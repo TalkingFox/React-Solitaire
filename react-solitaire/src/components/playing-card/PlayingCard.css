@@ -68,7 +68,7 @@
 }
 
 .suit-red {
-    color: red;
+    color: #d12d36;
 }
 
 .suit-black {
@@ -101,4 +101,19 @@
     width: 100%;
     height: 100%;
     vertical-align: middle;
+}
+
+.card-parent {
+    display: grid;
+}
+
+.card-parent>.card-parent {
+    margin-top: 2.1rem;
+    grid-row: 1;
+    grid-column: 1;
+}
+
+.card-parent>.card {
+    grid-row: 1;
+    grid-column: 1;
 }
