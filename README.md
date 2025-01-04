@@ -2,7 +2,7 @@
 
 A fun project to stretch my legs with React; a working game of solitaire. Uses [Atlassian's Pragmattic Drag and Drop](https://github.com/atlassian/pragmatic-drag-and-drop) for drag and drop functionality. 
 
-Play it [https://solitaire.wyleconsesone.com/](Here!)
+Play it [Here!](https://solitaire.wyleconsesone.com/)
 
 ![](./react-solitaire/screen-shot.png)
 
