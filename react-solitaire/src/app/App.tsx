@@ -6,6 +6,7 @@ import DeckStack, { PopDeckHandle } from '../components/deck-stack/DeckStack.tsx
 import CardStack from '../components/card-stack/CardStack.tsx';
 import CardColumn from '../components/card-column/CardColumn.tsx';
 import { CARD_TEXT_BY_VALUE, CARD_VALUE_BY_TEXT } from '../shared/card-values.ts';
+import Confetti from '../components/confetti/Confetti.tsx';
 
 function App() {
     useEffect(() => {
@@ -313,6 +314,7 @@ function App() {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                 </div>
             </div>
+            <Confetti></Confetti>
         </>
     )
 }

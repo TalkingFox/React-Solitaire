@@ -58,7 +58,7 @@ function CardCenter({ symbol, face, numberOfElements }: CardFace) {
         <>
             <div className={parentClassName}>
                 {
-                    columns.map((column, columnIndex) => {
+                    columns.map((column, _) => {
                         return (
                             <div className={column.class} key={crypto.randomUUID()}>
                                 {
