@@ -40,10 +40,68 @@ function buildStartingDeck() {
     return fullDeck;
 }
 
+function buildColumns(startingDeck: CardProps[]) {
+    let columns: CardProps[][] = [[], [], [], [], [], [], []]
+    for (let i = 0; i < columns.length; i++) {
+        for (let j = 0; j + i < columns.length; j++) {
+            const currentIndex = i + j;
+            const popCard = startingDeck.pop();
+            if (!popCard) {
+                continue
+            }
+            popCard.source = CardSource.CardColumn;
+            columns[currentIndex].push(popCard);
+        }
+    }
+
+    columns.forEach((column) => {
+        if (column.length == 0) {
+            return;
+        }
+        column[column.length - 1].isFaceDown = false;
+    });
+    return columns;
+}
+
+function canSendCardToStack(card: CardProps, stacks: CardProps[][]): [boolean, CardProps[] | null] {
+    let foundMatch: Boolean = false;
+    let stackMatch: CardProps[] = [];
+
+    // find appropriate stack
+    stacks.forEach((stack: CardProps[]) => {
+        if (stack.length > 0 && stack[0].suit == card.suit) {
+            stackMatch = stack;
+            foundMatch = true;
+            return [false, null];
+        }
+        if (stack.length == 0 && !foundMatch) {
+            stackMatch = stack;
+            foundMatch = true;
+        }
+    });
+
+    if (!foundMatch) {
+        // Shouldn't happen, but who knows, eh?
+        return [false, null];
+    }
+
+    // Check that the card belongs at the top of the stack.
+    let expectedValue: number = 0;
+    if (stackMatch.length == 0) {
+        expectedValue = 1
+    } else {
+        const cardToIncrement = stackMatch[stackMatch.length - 1];
+        expectedValue = CARD_VALUE_BY_TEXT[cardToIncrement.text] + 1
+    }
+
+    const expectedText = CARD_TEXT_BY_VALUE[expectedValue]
+    if (card.text == expectedText) {
+        return [true, stackMatch]
+    }
+    return [false, null]
+}
 
 function App() {
-    const [showWinBanner, setShowWinBanner] = useState(true);
-
     useEffect(() => {
         document.body.addEventListener('dragover', (event) => {
             event.preventDefault();
@@ -51,75 +109,49 @@ function App() {
     });
 
     const startingDeck = useMemo(buildStartingDeck, []);
+    const startingColumns = useMemo<CardProps[][]>(() => buildColumns(startingDeck), []);
 
-    const startingColumns = useMemo<CardProps[][]>(() => {
-        let columns: CardProps[][] = [[], [], [], [], [], [], []]
-        for (let i = 0; i < columns.length; i++) {
-            for (let j = 0; j + i < columns.length; j++) {
-                const currentIndex = i + j;
-                const popCard = startingDeck.pop();
-                if (!popCard) {
-                    continue
-                }
-                popCard.source = CardSource.CardColumn;
-                columns[currentIndex].push(popCard);
-            }
-        }
-
-        columns.forEach((column) => {
-            if (column.length == 0) {
-                return;
-            }
-            column[column.length - 1].isFaceDown = false;
-        });
-        return columns;
-    }, []);
-
+    const [currentDeck, setCurrentDeck] = useState<CardProps[]>(startingDeck);
     const [cardStacks, setCardStacks] = useState<CardProps[][]>([[], [], [], []]);
     const [cardColumns, setCardColumns] = useState<CardProps[][]>(startingColumns);
+    const [showWinBanner, setShowWinBanner] = useState(false);
 
     const deckRef = useRef<PopDeckHandle>(null);
 
-    const canSendCardToStack: (card: CardProps, stacks?: CardProps[][]) => [boolean, CardProps[] | null] = (card: CardProps, stacks: CardProps[][] = cardStacks) => {
-        let foundMatch: Boolean = false;
-        let stackMatch: CardProps[] = [];
+    const onHideWinBanner = () => {
+        setShowWinBanner(false);
+    };
 
-        // find appropriate stack
-        stacks.forEach((stack: CardProps[]) => {
-            if (stack.length > 0 && stack[0].suit == card.suit) {
-                stackMatch = stack;
-                foundMatch = true;
-                return [false, null];
-            }
-            if (stack.length == 0 && !foundMatch) {
-                stackMatch = stack;
-                foundMatch = true;
-            }
+    const startNewGame = () => {
+        const newDeck = buildStartingDeck();
+        const newColumns = buildColumns(newDeck);
+        
+        setCurrentDeck(newDeck);
+        setCardColumns(newColumns);
+
+        const newStacks = [[], [], [], []];
+        setCardStacks(newStacks);
+
+        if (deckRef.current) {
+            deckRef.current.refreshDeck(newDeck);
+        }
+        setShowWinBanner(false);
+    };
+
+    useEffect(() => {
+        const isGameWon = cardStacks.every((cardStack) => {
+            return cardStack.length == 13;
         });
 
-        if (!foundMatch) {
-            // Shouldn't happen, but who knows, eh?
-            return [false, null];
+        if (!isGameWon) {
+            return;
         }
 
-        // Check that the card belongs at the top of the stack.
-        let expectedValue: number = 0;
-        if (stackMatch.length == 0) {
-            expectedValue = 1
-        } else {
-            const cardToIncrement = stackMatch[stackMatch.length - 1];
-            expectedValue = CARD_VALUE_BY_TEXT[cardToIncrement.text] + 1
-        }
-
-        const expectedText = CARD_TEXT_BY_VALUE[expectedValue]
-        if (card.text == expectedText) {
-            return [true, stackMatch]
-        }
-        return [false, null]
-    }
+        setShowWinBanner(true);
+    }, [cardStacks]);
 
     const columnCardRightClicked = (card: CardProps, columnIndex: number) => {
-        const [canSendCard, matchingStack] = canSendCardToStack(card);
+        const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
         if (!canSendCard || !matchingStack) {
             return;
         }
@@ -140,7 +172,7 @@ function App() {
     };
 
     const trySendDeckCardFromDeck = (card: CardProps) => {
-        const [canSendCard, matchingStack] = canSendCardToStack(card);
+        const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
         if (!canSendCard || !matchingStack) {
             return false;
         }
@@ -296,14 +328,10 @@ function App() {
         setCardColumns(newColumns);
     };
 
-    const onHideWinBanner = () => {
-        setShowWinBanner(false);
-    };
-
     return (
         <>
             <div className="top-row">
-                <DeckStack startingDeck={startingDeck} trySendCardToStack={trySendDeckCardFromDeck} ref={deckRef} />
+                <DeckStack startingDeck={currentDeck} trySendCardToStack={trySendDeckCardFromDeck} ref={deckRef} />
                 <div className="deck-spacer"></div>
                 <div className="card-stacks row">
                     <CardStack cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
@@ -323,7 +351,7 @@ function App() {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                 </div>
             </div>
-            {showWinBanner ? <WinBanner showConfetti={false} onHideBanner={onHideWinBanner}></WinBanner> : undefined}
+            {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
     )
 }

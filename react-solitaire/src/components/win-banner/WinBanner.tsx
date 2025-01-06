@@ -1,12 +1,16 @@
+import { useState } from 'react';
 import Confetti from './Confetti/Confetti';
 import './WinBanner.css';
 
 export interface WinBannerProps {
-    showConfetti: boolean,
-    onHideBanner: () => void
+    onHideBanner: () => void,
+    onNewGame: () => void
 }
 
-function WinBanner({ showConfetti, onHideBanner }: WinBannerProps) {
+function WinBanner({ onHideBanner, onNewGame }: WinBannerProps) {
+    const [showConfetti, setShowConfetti] = useState(true);
+    setTimeout(() => { setShowConfetti(false) }, 10000);
+
     const confettiElement = showConfetti ? <Confetti /> : undefined
     return (
         <div id='banner-parent'>
@@ -16,7 +20,7 @@ function WinBanner({ showConfetti, onHideBanner }: WinBannerProps) {
                 </div>
                 <div className='banner-button-container'>
                     <button onClick={onHideBanner} className='banner-button'>Close</button>
-                    <button className='banner-button'>Play New Game</button>
+                    <button onClick={onNewGame} className='banner-button'>Play New Game</button>
                 </div>
             </div>
             {confettiElement}

@@ -24,7 +24,7 @@ function rainConfetti(canvas: HTMLCanvasElement) {
     let shouldDestroyConfetti = false;
     setTimeout(() => {
         shouldDestroyConfetti = true;
-    }, 3000);
+    }, 1000);
     function draw() {
         const results = [];
         requestAnimationFrame(draw);

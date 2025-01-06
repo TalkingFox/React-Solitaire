@@ -10,7 +10,8 @@ export interface DeckStackProps {
 }
 
 export type PopDeckHandle = {
-    popPile: () => void
+    popPile: () => void,
+    refreshDeck: (newDeck: CardProps[]) => void
 };
 
 const DeckStack = forwardRef(function DeckStack({ startingDeck, trySendCardToStack }: DeckStackProps, ref: React.ForwardedRef<unknown>) {
@@ -27,6 +28,9 @@ const DeckStack = forwardRef(function DeckStack({ startingDeck, trySendCardToSta
                 setLastThreeCards(
                     newPile.slice(Math.max(newPile.length - 3, 0))
                 );
+            },
+            refreshDeck(newDeck: CardProps[]) {
+                setDeck(newDeck);
             }
         }
     })
