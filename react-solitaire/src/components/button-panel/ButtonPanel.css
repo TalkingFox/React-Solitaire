@@ -8,6 +8,7 @@
     display: flex;
     flex-direction: column;
     align-items: end;
+    pointer-events: none;
 }
 
 .button-column {
@@ -31,4 +32,5 @@
     border: solid 1px black;
     border-radius: 5px;
     cursor: pointer;
+    pointer-events: all;
 }
