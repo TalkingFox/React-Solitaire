@@ -31,6 +31,7 @@ const DeckStack = forwardRef(function DeckStack({ startingDeck, trySendCardToSta
             },
             refreshDeck(newDeck: CardProps[]) {
                 setDeck(newDeck);
+                setLastThreeCards([]);
             }
         }
     })

@@ -7,6 +7,7 @@ import CardStack from '../components/card-stack/CardStack.tsx';
 import CardColumn from '../components/card-column/CardColumn.tsx';
 import { CARD_TEXT_BY_VALUE, CARD_VALUE_BY_TEXT } from '../shared/card-values.ts';
 import WinBanner from '../components/win-banner/WinBanner.tsx';
+import ButtonPanel from '../components/button-panel/ButtonPanel.tsx';
 
 function buildStartingDeck() {
     const suits = [
@@ -351,6 +352,7 @@ function App() {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                 </div>
             </div>
+            <ButtonPanel newGameClicked={startNewGame}></ButtonPanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
     )
