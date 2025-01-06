@@ -32,13 +32,13 @@ function rainConfetti(canvas: HTMLCanvasElement) {
         const context = canvasSettings.context;
         context.clearRect(0, 0, canvasSettings.width, canvasSettings.height);
 
-        for (let i = 0; i < confettiLimit; i++) {
+        for (let i = 0; i < particles.length; i++) {
             results.push(particles[i].Draw());
         }
 
         let particle: ConfettiParticle;
         let remainingFlakes = 0;
-        for (let i = 0; i < confettiLimit; i++) {
+        for (let i = 0; i < particles.length; i++) {
             particle = particles[i];
 
             particle.tiltAngle += particle.tiltAngleIncrement;
@@ -49,12 +49,14 @@ function rainConfetti(canvas: HTMLCanvasElement) {
                 remainingFlakes++;
             }
 
-            if (!shouldDestroyConfetti) {
-                if (particle.x > canvasSettings.width + 30 || particle.x < -30 || particle.y > canvasSettings.height) {
-                    particle.x = Math.random() * canvasSettings.width;
-                    particle.y = -30;
-                    particle.tilt = Math.floor(Math.random() * 10) - 20;
-                }
+            if (shouldDestroyConfetti) {
+                continue;
+            }
+            if (particle.x > canvasSettings.width + 30 || particle.x < -30 || particle.y > canvasSettings.height) {
+                particle.x = Math.random() * canvasSettings.width;
+                particle.y = -30;
+                particle.tilt = Math.floor(Math.random() * 10) - 20;
+
             }
         }
         return results;

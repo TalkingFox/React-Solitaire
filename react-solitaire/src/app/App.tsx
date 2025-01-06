@@ -6,46 +6,51 @@ import DeckStack, { PopDeckHandle } from '../components/deck-stack/DeckStack.tsx
 import CardStack from '../components/card-stack/CardStack.tsx';
 import CardColumn from '../components/card-column/CardColumn.tsx';
 import { CARD_TEXT_BY_VALUE, CARD_VALUE_BY_TEXT } from '../shared/card-values.ts';
-import Confetti from '../components/confetti/Confetti.tsx';
+import WinBanner from '../components/win-banner/WinBanner.tsx';
+
+function buildStartingDeck() {
+    const suits = [
+        CardSuit.Clubs,
+        CardSuit.Diamonds,
+        CardSuit.Hearts,
+        CardSuit.Spades
+    ]
+    const texts = [
+        "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"
+    ]
+
+    const fullDeck = suits.flatMap(suit => {
+        return texts.map(text => {
+            let prop: CardProps = {
+                suit: suit,
+                text: text,
+                source: CardSource.DrawPile,
+                children: []
+            };
+            return prop
+        });
+    });
+
+
+    // shuffle deck
+    for (let i = fullDeck.length - 1; i > 0; i--) {
+        const shuffle = Math.floor(Math.random() * i);
+        [fullDeck[i], fullDeck[shuffle]] = [fullDeck[shuffle], fullDeck[i]];
+    }
+    return fullDeck;
+}
+
 
 function App() {
+    const [showWinBanner, setShowWinBanner] = useState(true);
+
     useEffect(() => {
         document.body.addEventListener('dragover', (event) => {
             event.preventDefault();
         });
     });
 
-    const startingDeck = useMemo(() => {
-        const suits = [
-            CardSuit.Clubs,
-            CardSuit.Diamonds,
-            CardSuit.Hearts,
-            CardSuit.Spades
-        ]
-        const texts = [
-            "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"
-        ]
-
-        const fullDeck = suits.flatMap(suit => {
-            return texts.map(text => {
-                let prop: CardProps = {
-                    suit: suit,
-                    text: text,
-                    source: CardSource.DrawPile,
-                    children: []
-                };
-                return prop
-            });
-        });
-
-
-        // shuffle deck
-        for (let i = fullDeck.length - 1; i > 0; i--) {
-            const shuffle = Math.floor(Math.random() * i);
-            [fullDeck[i], fullDeck[shuffle]] = [fullDeck[shuffle], fullDeck[i]];
-        }
-        return fullDeck;
-    }, []);
+    const startingDeck = useMemo(buildStartingDeck, []);
 
     const startingColumns = useMemo<CardProps[][]>(() => {
         let columns: CardProps[][] = [[], [], [], [], [], [], []]
@@ -291,6 +296,10 @@ function App() {
         setCardColumns(newColumns);
     };
 
+    const onHideWinBanner = () => {
+        setShowWinBanner(false);
+    };
+
     return (
         <>
             <div className="top-row">
@@ -314,7 +323,7 @@ function App() {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                 </div>
             </div>
-            <Confetti></Confetti>
+            {showWinBanner ? <WinBanner showConfetti={false} onHideBanner={onHideWinBanner}></WinBanner> : undefined}
         </>
     )
 }
