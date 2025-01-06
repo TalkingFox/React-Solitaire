@@ -20,7 +20,7 @@ function WinBanner({ onHideBanner, onNewGame }: WinBannerProps) {
                 </div>
                 <div className='banner-button-container'>
                     <button onClick={onHideBanner} className='banner-button'>Close</button>
-                    <button onClick={onNewGame} className='banner-button'>Play New Game</button>
+                    <button onClick={onNewGame} className='banner-button'>New Game</button>
                 </div>
             </div>
             {confettiElement}
