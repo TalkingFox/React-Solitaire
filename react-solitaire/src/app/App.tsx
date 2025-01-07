@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { CardProps, CardSource } from '../components/playing-card/PlayingCard.tsx'
 import { CardSuit } from '../shared/enums.ts';
-import DeckStack, { PopDeckHandle } from '../components/deck-stack/DeckStack.tsx';
+import DeckStack from '../components/deck-stack/DeckStack.tsx';
 import CardStack from '../components/card-stack/CardStack.tsx';
 import CardColumn from '../components/card-column/CardColumn.tsx';
 import { CARD_TEXT_BY_VALUE, CARD_VALUE_BY_TEXT } from '../shared/card-values.ts';
@@ -102,6 +102,13 @@ function canSendCardToStack(card: CardProps, stacks: CardProps[][]): [boolean, C
     return [false, null]
 }
 
+interface StateHistory {
+    drawDeck?: CardProps[],
+    drawPile?: CardProps[],
+    cardStacks?: CardProps[][],
+    cardColumns?: CardProps[][],
+}
+
 function App() {
     useEffect(() => {
         document.body.addEventListener('dragover', (event) => {
@@ -112,12 +119,20 @@ function App() {
     const startingDeck = useMemo(buildStartingDeck, []);
     const startingColumns = useMemo<CardProps[][]>(() => buildColumns(startingDeck), []);
 
-    const [currentDeck, setCurrentDeck] = useState<CardProps[]>(startingDeck);
     const [cardStacks, setCardStacks] = useState<CardProps[][]>([[], [], [], []]);
     const [cardColumns, setCardColumns] = useState<CardProps[][]>(startingColumns);
     const [showWinBanner, setShowWinBanner] = useState(false);
+    const [drawDeck, setDrawDeck] = useState<CardProps[]>(startingDeck.slice(0));
+    const [drawPile, setDrawPile] = useState<CardProps[]>([]);
+    const [undoStack, setUndoStack] = useState<StateHistory[]>([
+        {
+            cardColumns: cardColumns.map((col) => col.map(item => structuredClone(item))),
+            cardStacks: cardStacks.map((stack) => stack.map(item => structuredClone(item))),
+            drawDeck: drawDeck.map(item => structuredClone(item)),
+            drawPile: drawPile.map(item => structuredClone(item))
+        }
+    ]);
 
-    const deckRef = useRef<PopDeckHandle>(null);
 
     const onHideWinBanner = () => {
         setShowWinBanner(false);
@@ -126,18 +141,37 @@ function App() {
     const startNewGame = () => {
         const newDeck = buildStartingDeck();
         const newColumns = buildColumns(newDeck);
-        
-        setCurrentDeck(newDeck);
+
         setCardColumns(newColumns);
 
         const newStacks = [[], [], [], []];
         setCardStacks(newStacks);
 
-        if (deckRef.current) {
-            deckRef.current.refreshDeck(newDeck);
-        }
+        setDrawDeck(newDeck);
+        setDrawPile([]);
+
+        updateUndoStack({
+            cardColumns: newColumns,
+            cardStacks: newStacks,
+            drawDeck: newDeck,
+            drawPile: []
+        }, true);
+
         setShowWinBanner(false);
     };
+
+    const updateUndoStack = (sourceData: StateHistory, clearStack: boolean = false) => {
+        const snapshot: StateHistory = {
+            cardColumns: (sourceData.cardColumns ?? cardColumns).map((col) => col.map(item => structuredClone(item))),
+            cardStacks: (sourceData.cardStacks ?? cardStacks).map((stack) => stack.map(item => structuredClone(item))),
+            drawDeck: (sourceData.drawDeck ?? drawDeck).map((item) => structuredClone(item)),
+            drawPile: (sourceData.drawPile ?? drawPile).map((item) => structuredClone(item))
+        };
+
+        const newStack = clearStack ? [] : undoStack.slice(0);
+        newStack.push(snapshot);
+        setUndoStack(newStack);
+    }
 
     useEffect(() => {
         const isGameWon = cardStacks.every((cardStack) => {
@@ -170,21 +204,10 @@ function App() {
             newColumn[newColumn.length - 1].isFaceDown = false;
         }
         setCardColumns(newColumns);
-    };
-
-    const trySendDeckCardFromDeck = (card: CardProps) => {
-        const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
-        if (!canSendCard || !matchingStack) {
-            return false;
-        }
-
-        // Add card to stack
-        const newStacks = cardStacks.slice(0);
-        matchingStack.push(card);
-        setCardStacks(newStacks);
-
-        // Remove card from deck
-        return true;
+        updateUndoStack({
+            cardColumns: newColumns,
+            cardStacks: newStacks
+        });
     };
 
     function onStackCardDrop(card: CardProps, stackIndex: number) {
@@ -201,11 +224,13 @@ function App() {
         // Add card to stack
         const newStacks = cardStacks.slice(0);
 
+        const snapshot: StateHistory = {};
         // find card's source and remove it.
         if (card.source == CardSource.DrawPile) {
-            if (deckRef.current != null) {
-                deckRef.current.popPile();
-            }
+            const newPile = drawPile.slice(0);
+            newPile.pop();
+            setDrawPile(newPile);
+            snapshot.drawPile = newPile;
         }
         else if (card.source == CardSource.CardColumn) {
             const newColumns = cardColumns.slice(0);
@@ -221,6 +246,7 @@ function App() {
                         column[column.length - 1].isFaceDown = false;
                     }
                     setCardColumns(newColumns);
+                    snapshot.cardColumns = newColumns;
                     break;
                 }
             }
@@ -242,6 +268,9 @@ function App() {
         card.source = CardSource.CardStack;
         stack.push(card);
         setCardStacks(newStacks);
+        snapshot.cardStacks = newStacks;
+        updateUndoStack(snapshot);
+
     };
 
     function onColumnCardDrop(card: CardProps, columnIndex: number) {
@@ -268,15 +297,18 @@ function App() {
             return;
         }
 
+        const snapshot: StateHistory = {};
+
         // Add card to stack
         const newColumns = cardColumns.slice(0);
         card.isFaceDown = false;
 
         // find card's source and remove it.
         if (card.source == CardSource.DrawPile) {
-            if (deckRef.current != null) {
-                deckRef.current.popPile();
-            }
+            const newPile = drawPile.slice(0);
+            newPile.pop();
+            setDrawPile(newPile);
+            snapshot.drawPile = newPile;
         }
         else if (card.source == CardSource.CardColumn) {
             let sourceTopCard = card;
@@ -314,6 +346,7 @@ function App() {
                 if (card.suit == topCard.suit && card.text == topCard.text) {
                     stack.pop();
                     setCardStacks(newStacks);
+                    snapshot.cardStacks = newStacks;
                     break;
                 }
             }
@@ -327,12 +360,81 @@ function App() {
             });
         }
         setCardColumns(newColumns);
+        snapshot.cardColumns = newColumns;
+        updateUndoStack(snapshot);
     };
+
+    const deckCardRightClicked = (card: CardProps) => {
+        const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
+        if (!canSendCard || !matchingStack) {
+            return;
+        }
+
+        // Add card to stack
+        const newStacks = cardStacks.slice(0);
+        matchingStack.push(card);
+        setCardStacks(newStacks);
+
+        const newPile = drawPile.slice(0);
+        newPile.pop();
+        setDrawPile(newPile);
+        updateUndoStack({ cardStacks: newStacks, drawPile: newPile });
+    };
+
+    const drawCardsClicked = () => {
+        let newDeck: CardProps[];
+        let newPile: CardProps[];
+        if (drawDeck.length == 0) {
+            newDeck = drawPile.slice(0).reverse();
+            newPile = [];
+        }
+        else {
+            newDeck = drawDeck.slice(0)
+            newPile = drawPile.slice(0);
+        }
+
+        const poppedCards = [
+            newDeck.pop(),
+            newDeck.pop(),
+            newDeck.pop()
+        ].filter(x => x !== null && x !== undefined);
+        newPile.push(...poppedCards);
+
+        setDrawDeck(newDeck);
+        setDrawPile(newPile);
+        updateUndoStack({ drawDeck: newDeck, drawPile: newPile });
+    };
+
+    const undoClicked = () => {
+        if (undoStack.length < 2) {
+            return;
+        }
+
+        const newStack = undoStack.slice(0);
+        newStack.pop();
+        if (newStack.length == 0) {
+            return;
+        }
+
+        const revertState = newStack[newStack.length - 1];
+        setCardColumns(
+            revertState.cardColumns!.map((col) => col.map(item => structuredClone(item)))
+        );
+        setCardStacks(
+            revertState.cardStacks!.map((stack) => stack.map(item => structuredClone(item)))
+        );
+
+        setDrawDeck(revertState.drawDeck!.map(item => structuredClone(item)));
+        setDrawPile(revertState.drawPile!.map(item => structuredClone(item)));
+
+        setUndoStack(newStack);
+    }
+
 
     return (
         <>
             <div className="top-row">
-                <DeckStack startingDeck={currentDeck} trySendCardToStack={trySendDeckCardFromDeck} ref={deckRef} />
+                <DeckStack deck={drawDeck} playedCards={drawPile} cardRightClicked={deckCardRightClicked} drawCardsClicked={drawCardsClicked} />
                 <div className="deck-spacer"></div>
                 <div className="card-stacks row">
                     <CardStack cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
@@ -352,7 +454,7 @@ function App() {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                 </div>
             </div>
-            <ButtonPanel newGameClicked={startNewGame}></ButtonPanel>
+            <ButtonPanel newGameClicked={startNewGame} undoClicked={undoClicked}></ButtonPanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
     )
