@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { CardProps, CardSource } from '../components/playing-card/PlayingCard.tsx'
 import { CardSuit } from '../shared/enums.ts';
