@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { CardProps, CardSource } from '../components/playing-card/PlayingCard.tsx'
 import { CardSuit } from '../shared/enums.ts';
-import DeckStack, { PopDeckHandle } from '../components/deck-stack/DeckStack.tsx';
+import DeckStack from '../components/deck-stack/DeckStack.tsx';
 import CardStack from '../components/card-stack/CardStack.tsx';
 import CardColumn from '../components/card-column/CardColumn.tsx';
 import { CARD_TEXT_BY_VALUE, CARD_VALUE_BY_TEXT } from '../shared/card-values.ts';
@@ -102,6 +102,12 @@ function canSendCardToStack(card: CardProps, stacks: CardProps[][]): [boolean, C
     return [false, null]
 }
 
+interface StateHistory {
+    currentDeck?: CardProps[],
+    cardStacks?: CardProps[][],
+    cardColumns?: CardProps[][],
+}
+
 function App() {
     useEffect(() => {
         document.body.addEventListener('dragover', (event) => {
@@ -116,8 +122,9 @@ function App() {
     const [cardStacks, setCardStacks] = useState<CardProps[][]>([[], [], [], []]);
     const [cardColumns, setCardColumns] = useState<CardProps[][]>(startingColumns);
     const [showWinBanner, setShowWinBanner] = useState(false);
-
-    const deckRef = useRef<PopDeckHandle>(null);
+    const [drawDeck, setDrawDeck] = useState<CardProps[]>(startingDeck.slice(0));
+    const [drawPile, setDrawPile] = useState<CardProps[]>([]);
+    const [undoStack, setUndoStack] = useState<StateHistory[]>([]);
 
     const onHideWinBanner = () => {
         setShowWinBanner(false);
@@ -126,16 +133,16 @@ function App() {
     const startNewGame = () => {
         const newDeck = buildStartingDeck();
         const newColumns = buildColumns(newDeck);
-        
+
         setCurrentDeck(newDeck);
         setCardColumns(newColumns);
 
         const newStacks = [[], [], [], []];
         setCardStacks(newStacks);
+        
+        setDrawDeck(newDeck);
+        setDrawPile([]);
 
-        if (deckRef.current) {
-            deckRef.current.refreshDeck(newDeck);
-        }
         setShowWinBanner(false);
     };
 
@@ -170,21 +177,7 @@ function App() {
             newColumn[newColumn.length - 1].isFaceDown = false;
         }
         setCardColumns(newColumns);
-    };
-
-    const trySendDeckCardFromDeck = (card: CardProps) => {
-        const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
-        if (!canSendCard || !matchingStack) {
-            return false;
-        }
-
-        // Add card to stack
-        const newStacks = cardStacks.slice(0);
-        matchingStack.push(card);
-        setCardStacks(newStacks);
-
-        // Remove card from deck
-        return true;
+        // addToUndoStack({ kind: MoveKind.MovedCard, target: CardSource.CardColumn, card: card });
     };
 
     function onStackCardDrop(card: CardProps, stackIndex: number) {
@@ -203,9 +196,9 @@ function App() {
 
         // find card's source and remove it.
         if (card.source == CardSource.DrawPile) {
-            if (deckRef.current != null) {
-                deckRef.current.popPile();
-            }
+            const newPile = drawPile.slice(0);
+            newPile.pop();
+            setDrawPile(newPile);
         }
         else if (card.source == CardSource.CardColumn) {
             const newColumns = cardColumns.slice(0);
@@ -239,9 +232,11 @@ function App() {
                 }
             }
         }
+        // addToUndoStack({ kind: MoveKind.MovedCard, target: CardSource.CardStack, card: card });
         card.source = CardSource.CardStack;
         stack.push(card);
         setCardStacks(newStacks);
+
     };
 
     function onColumnCardDrop(card: CardProps, columnIndex: number) {
@@ -274,9 +269,9 @@ function App() {
 
         // find card's source and remove it.
         if (card.source == CardSource.DrawPile) {
-            if (deckRef.current != null) {
-                deckRef.current.popPile();
-            }
+            const newPile = drawPile.slice(0);
+            newPile.pop();
+            setDrawPile(newPile);
         }
         else if (card.source == CardSource.CardColumn) {
             let sourceTopCard = card;
@@ -318,6 +313,11 @@ function App() {
                 }
             }
         }
+        // addToUndoStack({
+        //     kind: MoveKind.MovedCard,
+        //     card: card,
+        //     target: CardSource.CardColumn
+        // });
         card.source = CardSource.CardColumn
         column.push(card)
         if (card.children) {
@@ -329,10 +329,51 @@ function App() {
         setCardColumns(newColumns);
     };
 
+    const deckCardRightClicked = (card: CardProps) => {
+        const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
+        if (!canSendCard || !matchingStack) {
+            return;
+        }
+
+        // Add card to stack
+        const newStacks = cardStacks.slice(0);
+        matchingStack.push(card);
+        setCardStacks(newStacks);
+
+        const newPile = drawPile.slice(0);
+        newPile.pop();
+        setDrawPile(newPile);
+        // addToUndoStack({ kind: MoveKind.MovedCard, target: CardSource.DrawPile, card: card });
+    };
+
+    const drawCardsClicked = () => {
+        let newDeck: CardProps[];
+        let newPile: CardProps[];
+        if (drawDeck.length == 0) {
+            newDeck = drawPile.slice(0).reverse();
+            newPile = [];
+        }
+        else {
+            newDeck = drawDeck.slice(0)
+            newPile = drawPile.slice(0);
+        }
+
+        const poppedCards = [
+            newDeck.pop(),
+            newDeck.pop(),
+            newDeck.pop()
+        ].filter(x => x !== null && x !== undefined);
+        newPile.push(...poppedCards);
+
+        setDrawDeck(newDeck);
+        setDrawPile(newPile);
+    };
+
+
     return (
         <>
             <div className="top-row">
-                <DeckStack startingDeck={currentDeck} trySendCardToStack={trySendDeckCardFromDeck} ref={deckRef} />
+                <DeckStack deck={drawDeck} playedCards={drawPile} cardRightClicked={deckCardRightClicked} drawCardsClicked={drawCardsClicked} />
                 <div className="deck-spacer"></div>
                 <div className="card-stacks row">
                     <CardStack cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
@@ -352,7 +393,7 @@ function App() {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                 </div>
             </div>
-            <ButtonPanel newGameClicked={startNewGame}></ButtonPanel>
+            <ButtonPanel newGameClicked={startNewGame} undoClicked={console.log}></ButtonPanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
     )
