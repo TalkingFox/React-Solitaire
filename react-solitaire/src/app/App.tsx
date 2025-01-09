@@ -122,7 +122,7 @@ function canAutoSolve(currentSnapshot: StateHistory): boolean {
 
     for (let i = 0; i < currentSnapshot.cardColumns.length; i++) {
         const column = currentSnapshot.cardColumns[i];
-        if (column.some(card => card.isFaceDown)) {
+        if (column.some(card => card.isFaceDown ?? true)) {
             return false;
         }
     }
@@ -505,7 +505,7 @@ function App() {
                     clearInterval(solveIntervalRef.current);
                 }
             }
-        }, 500);
+        }, 250);
     }
 
     if (isSolving) {
@@ -515,6 +515,7 @@ function App() {
     const autoSolveClicked = () => {
         setSolving(true);
         solveNextCard();
+        setShowAutoSolve(false);
     };
 
     return (
