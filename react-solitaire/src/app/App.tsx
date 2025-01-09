@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import './App.css'
 import { CardProps, CardSource } from '../components/playing-card/PlayingCard.tsx'
 import { CardSuit } from '../shared/enums.ts';
@@ -7,7 +7,7 @@ import CardStack from '../components/card-stack/CardStack.tsx';
 import CardColumn from '../components/card-column/CardColumn.tsx';
 import { CARD_TEXT_BY_VALUE, CARD_VALUE_BY_TEXT } from '../shared/card-values.ts';
 import WinBanner from '../components/win-banner/WinBanner.tsx';
-import ButtonPanel from '../components/button-panel/ButtonPanel.tsx';
+import SidePanel, { SidePanelHandles } from '../components/side-panel/SidePanel.tsx';
 
 function buildStartingDeck() {
     const suits = [
@@ -109,6 +109,27 @@ interface StateHistory {
     cardColumns?: CardProps[][],
 }
 
+function canAutoSolve(currentSnapshot: StateHistory): boolean {
+    if (!currentSnapshot.cardColumns) {
+        return false;
+    }
+    if ((currentSnapshot.drawDeck ?? []).length > 0) {
+        return false;
+    }
+    if ((currentSnapshot.drawPile ?? []).length > 0) {
+        return false;
+    }
+
+    for (let i = 0; i < currentSnapshot.cardColumns.length; i++) {
+        const column = currentSnapshot.cardColumns[i];
+        if (column.some(card => card.isFaceDown ?? true)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function App() {
     useEffect(() => {
         document.body.addEventListener('dragover', (event) => {
@@ -132,9 +153,15 @@ function App() {
             drawPile: drawPile.map(item => structuredClone(item))
         }
     ]);
+    const [showAutoSolve, setShowAutoSolve] = useState(false);
+    const [isSolving, setSolving] = useState(false);
+    const solveIntervalRef = useRef<number | null>(null);
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
+    const sidepanelRef = useRef<SidePanelHandles>(null);
 
     const onHideWinBanner = () => {
+        sidepanelRef.current?.setTimerPaused(true);
         setShowWinBanner(false);
     };
 
@@ -157,7 +184,11 @@ function App() {
             drawPile: []
         }, true);
 
+        sidepanelRef.current?.setTimerPaused(false);
+        sidepanelRef.current?.resetTimer();
+
         setShowWinBanner(false);
+        setShowAutoSolve(false);
     };
 
     const updateUndoStack = (sourceData: StateHistory, clearStack: boolean = false) => {
@@ -171,6 +202,9 @@ function App() {
         const newStack = clearStack ? [] : undoStack.slice(0);
         newStack.push(snapshot);
         setUndoStack(newStack);
+        setShowAutoSolve(
+            canAutoSolve(snapshot)
+        );
     }
 
     useEffect(() => {
@@ -183,6 +217,7 @@ function App() {
         }
 
         setShowWinBanner(true);
+        sidepanelRef.current?.setTimerPaused(true);
     }, [cardStacks]);
 
     const columnCardRightClicked = (card: CardProps, columnIndex: number) => {
@@ -428,8 +463,60 @@ function App() {
         setDrawPile(revertState.drawPile!.map(item => structuredClone(item)));
 
         setUndoStack(newStack);
+        setShowAutoSolve(
+            canAutoSolve(revertState)
+        );
     }
 
+    const solveNextCard = () => {
+        if (solveIntervalRef.current) {
+            clearInterval(solveIntervalRef.current);
+        }
+        solveIntervalRef.current = setInterval(() => {
+            let allStacksEmpty = true;
+            for (let i = 0; i < cardColumns.length; i++) {
+                const column = cardColumns[i];
+                if (column.length == 0) {
+                    continue;
+                }
+                allStacksEmpty = false;
+                const card = column[column.length - 1];
+                const [canBank, stack] = canSendCardToStack(card, cardStacks);
+                if (!canBank) {
+                    continue
+                }
+
+                // Remove from column
+                column.pop();
+                // Add to stack
+                stack!.push(card);
+
+                setCardColumns(cardColumns);
+                setCardStacks(cardStacks);
+                break;
+            }
+            forceUpdate();
+            
+
+            if (allStacksEmpty) {
+                setSolving(false);
+                setShowWinBanner(true);
+                if (solveIntervalRef.current) {
+                    clearInterval(solveIntervalRef.current);
+                }
+            }
+        }, 250);
+    }
+
+    if (isSolving) {
+        solveNextCard();
+    }
+
+    const autoSolveClicked = () => {
+        setSolving(true);
+        solveNextCard();
+        setShowAutoSolve(false);
+    };
 
     return (
         <>
@@ -454,7 +541,7 @@ function App() {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                 </div>
             </div>
-            <ButtonPanel newGameClicked={startNewGame} undoClicked={undoClicked}></ButtonPanel>
+            <SidePanel ref={sidepanelRef} newGameClicked={startNewGame} undoClicked={undoClicked} showAutoSolve={showAutoSolve} autoSolveClicked={autoSolveClicked}></SidePanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
     )
