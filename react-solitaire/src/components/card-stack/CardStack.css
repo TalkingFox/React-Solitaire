@@ -11,14 +11,29 @@
 .card-stack-inner {
     width: 100%;
     height: 100%;
-    border: solid rgb(255,255,255,0.5) 3px;
+    border: solid rgb(255, 255, 255, 0.5) 3px;
     border-radius: 5px;
     display: grid;
 }
 
-.card-stack-inner > * {
+.card-stack-inner>* {
     margin-left: -6px;
     margin-top: -6px;
     grid-row: 1;
     grid-column: 1;
+}
+
+.empty-stack {
+    margin-left: 0px;
+    margin-top: 0px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.empty-stack-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px;
+    color: rgb(255, 255, 255, 0.5);
 }

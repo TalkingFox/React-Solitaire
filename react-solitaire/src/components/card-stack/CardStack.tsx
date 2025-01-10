@@ -25,6 +25,21 @@ function CardStack({ cards, onCardDropped }: CardStackProps) {
     });
 
     let displayCards: JSX.Element[] = []
+    if (cards.length == 0) {
+        const emptyStack = (
+            <div className='empty-stack'>
+                <div className='empty-stack-row'>
+                    <span>♠</span>
+                    <span>♥</span>
+                </div>
+                <div className='empty-stack-row'>
+                    <span>♣</span>
+                    <span>♦</span>
+                </div>
+            </div>
+        );
+        displayCards.push(emptyStack);
+    }
     if (cards.length > 0) {
         const topCard = cards[cards.length - 1];
         displayCards.push(<PlayingCard suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={1} key={crypto.randomUUID()}></PlayingCard>)
