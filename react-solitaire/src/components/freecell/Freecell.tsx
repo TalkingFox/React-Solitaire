@@ -1,28 +1,27 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import './Klondike.css';
-import { CardSuit } from '../../shared/enums.ts';
-import { CardProps, CardSource } from '../playing-card/PlayingCard.tsx';
-import SidePanel, { SidePanelHandles } from '../side-panel/SidePanel.tsx';
-import { CARD_TEXT_BY_VALUE, CARD_VALUE_BY_TEXT } from '../../shared/card-values.ts';
-import CardColumn from '../card-column/CardColumn.tsx';
-import CardStack from '../card-stack/CardStack.tsx';
-import DeckStack from '../deck-stack/DeckStack.tsx';
-import WinBanner from '../win-banner/WinBanner.tsx';
-import { SolitaireProps } from '../../shared/solitaire-props.ts';
-import { Variant } from '../../shared/variants.ts';
-import { DeckBuilder } from '../../shared/deck-builder.ts';
+import { useMemo, useRef, useState } from 'react';
+import { SolitaireProps } from '../../shared/solitaire-props';
+import { Variant } from '../../shared/variants';
+import CardColumn from '../card-column/CardColumn';
+import CardStack from '../card-stack/CardStack';
+import SidePanel, { SidePanelHandles } from '../side-panel/SidePanel';
+import WinBanner from '../win-banner/WinBanner';
+import './Freecell.css';
+import { CardProps, CardSource } from '../playing-card/PlayingCard';
+import { DeckBuilder } from '../../shared/deck-builder';
+import { CARD_VALUE_BY_TEXT, CARD_TEXT_BY_VALUE } from '../../shared/card-values';
+import { CardSuit } from '../../shared/enums';
+import FreeStack from '../free-stack/FreeStack';
 
 function buildColumns(startingDeck: CardProps[]) {
-    let columns: CardProps[][] = [[], [], [], [], [], [], []]
-    for (let i = 0; i < columns.length; i++) {
-        for (let j = 0; j + i < columns.length; j++) {
-            const currentIndex = i + j;
+    let columns: CardProps[][] = [[], [], [], [], [], [], [], []]
+    while (startingDeck.length > 0) {
+        for (let i = 0; i < columns.length; i++) {
             const popCard = startingDeck.pop();
             if (!popCard) {
                 continue
             }
             popCard.source = CardSource.CardColumn;
-            columns[currentIndex].push(popCard);
+            columns[i].push(popCard);
         }
     }
 
@@ -73,55 +72,14 @@ function canSendCardToStack(card: CardProps, stacks: CardProps[][]): [boolean, C
     return [false, null]
 }
 
-interface StateHistory {
-    drawDeck?: CardProps[],
-    drawPile?: CardProps[],
-    cardStacks?: CardProps[][],
-    cardColumns?: CardProps[][],
-}
-
-function canAutoSolve(currentSnapshot: StateHistory): boolean {
-    if (!currentSnapshot.cardColumns) {
-        return false;
-    }
-    if ((currentSnapshot.drawDeck ?? []).length > 0) {
-        return false;
-    }
-    if ((currentSnapshot.drawPile ?? []).length > 0) {
-        return false;
-    }
-
-    for (let i = 0; i < currentSnapshot.cardColumns.length; i++) {
-        const column = currentSnapshot.cardColumns[i];
-        if (column.some(card => card.isFaceDown ?? true)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function Klondike({ onVariantChanged }: SolitaireProps) {
+function Freecell({ onVariantChanged }: SolitaireProps) {
     const startingDeck = useMemo(DeckBuilder.BuildDeck, []);
     const startingColumns = useMemo<CardProps[][]>(() => buildColumns(startingDeck), []);
 
     const [cardStacks, setCardStacks] = useState<CardProps[][]>([[], [], [], []]);
+    const [freeCells, setFreeCells] = useState<CardProps[]>([]);
     const [cardColumns, setCardColumns] = useState<CardProps[][]>(startingColumns);
     const [showWinBanner, setShowWinBanner] = useState(false);
-    const [drawDeck, setDrawDeck] = useState<CardProps[]>(startingDeck.slice(0));
-    const [drawPile, setDrawPile] = useState<CardProps[]>([]);
-    const [undoStack, setUndoStack] = useState<StateHistory[]>([
-        {
-            cardColumns: cardColumns.map((col) => col.map(item => structuredClone(item))),
-            cardStacks: cardStacks.map((stack) => stack.map(item => structuredClone(item))),
-            drawDeck: drawDeck.map(item => structuredClone(item)),
-            drawPile: drawPile.map(item => structuredClone(item))
-        }
-    ]);
-    const [showAutoSolve, setShowAutoSolve] = useState(false);
-    const [isSolving, setSolving] = useState(false);
-    const solveIntervalRef = useRef<number | null>(null);
-    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
     const sidepanelRef = useRef<SidePanelHandles>(null);
 
@@ -139,51 +97,19 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
         const newStacks = [[], [], [], []];
         setCardStacks(newStacks);
 
-        setDrawDeck(newDeck);
-        setDrawPile([]);
-
-        updateUndoStack({
-            cardColumns: newColumns,
-            cardStacks: newStacks,
-            drawDeck: newDeck,
-            drawPile: []
-        }, true);
+        // updateUndoStack({
+        //     cardColumns: newColumns,
+        //     cardStacks: newStacks,
+        //     drawDeck: newDeck,
+        //     drawPile: []
+        // }, true);
 
         sidepanelRef.current?.setTimerPaused(false);
         sidepanelRef.current?.resetTimer();
 
         setShowWinBanner(false);
-        setShowAutoSolve(false);
+        // setShowAutoSolve(false);
     };
-
-    const updateUndoStack = (sourceData: StateHistory, clearStack: boolean = false) => {
-        const snapshot: StateHistory = {
-            cardColumns: (sourceData.cardColumns ?? cardColumns).map((col) => col.map(item => structuredClone(item))),
-            cardStacks: (sourceData.cardStacks ?? cardStacks).map((stack) => stack.map(item => structuredClone(item))),
-            drawDeck: (sourceData.drawDeck ?? drawDeck).map((item) => structuredClone(item)),
-            drawPile: (sourceData.drawPile ?? drawPile).map((item) => structuredClone(item))
-        };
-
-        const newStack = clearStack ? [] : undoStack.slice(0);
-        newStack.push(snapshot);
-        setUndoStack(newStack);
-        setShowAutoSolve(
-            canAutoSolve(snapshot)
-        );
-    }
-
-    useEffect(() => {
-        const isGameWon = cardStacks.every((cardStack) => {
-            return cardStack.length == 13;
-        });
-
-        if (!isGameWon) {
-            return;
-        }
-
-        setShowWinBanner(true);
-        sidepanelRef.current?.setTimerPaused(true);
-    }, [cardStacks]);
 
     const columnCardRightClicked = (card: CardProps, columnIndex: number) => {
         const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
@@ -204,10 +130,10 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
             newColumn[newColumn.length - 1].isFaceDown = false;
         }
         setCardColumns(newColumns);
-        updateUndoStack({
-            cardColumns: newColumns,
-            cardStacks: newStacks
-        });
+        // updateUndoStack({
+        //     cardColumns: newColumns,
+        //     cardStacks: newStacks
+        // });
     };
 
     function onStackCardDrop(card: CardProps, stackIndex: number) {
@@ -224,15 +150,9 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
         // Add card to stack
         const newStacks = cardStacks.slice(0);
 
-        const snapshot: StateHistory = {};
+        // const snapshot: StateHistory = {};
         // find card's source and remove it.
-        if (card.source == CardSource.DrawPile) {
-            const newPile = drawPile.slice(0);
-            newPile.pop();
-            setDrawPile(newPile);
-            snapshot.drawPile = newPile;
-        }
-        else if (card.source == CardSource.CardColumn) {
+        if (card.source == CardSource.CardColumn) {
             const newColumns = cardColumns.slice(0);
             for (let i = 0; i < newColumns.length; i++) {
                 const column = newColumns[i];
@@ -246,7 +166,7 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
                         column[column.length - 1].isFaceDown = false;
                     }
                     setCardColumns(newColumns);
-                    snapshot.cardColumns = newColumns;
+                    // snapshot.cardColumns = newColumns;
                     break;
                 }
             }
@@ -268,8 +188,8 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
         card.source = CardSource.CardStack;
         stack.push(card);
         setCardStacks(newStacks);
-        snapshot.cardStacks = newStacks;
-        updateUndoStack(snapshot);
+        // snapshot.cardStacks = newStacks;
+        // updateUndoStack(snapshot);
 
     };
 
@@ -297,20 +217,14 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
             return;
         }
 
-        const snapshot: StateHistory = {};
+        // const snapshot: StateHistory = {};
 
         // Add card to stack
         const newColumns = cardColumns.slice(0);
         card.isFaceDown = false;
 
         // find card's source and remove it.
-        if (card.source == CardSource.DrawPile) {
-            const newPile = drawPile.slice(0);
-            newPile.pop();
-            setDrawPile(newPile);
-            snapshot.drawPile = newPile;
-        }
-        else if (card.source == CardSource.CardColumn) {
+        if (card.source == CardSource.CardColumn) {
             let sourceTopCard = card;
             const childCards = card.children ?? [];
             let cardsToPop = 1 + childCards.length;
@@ -346,7 +260,7 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
                 if (card.suit == topCard.suit && card.text == topCard.text) {
                     stack.pop();
                     setCardStacks(newStacks);
-                    snapshot.cardStacks = newStacks;
+                    // snapshot.cardStacks = newStacks;
                     break;
                 }
             }
@@ -360,143 +274,29 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
             });
         }
         setCardColumns(newColumns);
-        snapshot.cardColumns = newColumns;
-        updateUndoStack(snapshot);
-    };
-
-    const deckCardRightClicked = (card: CardProps) => {
-        const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
-        if (!canSendCard || !matchingStack) {
-            return;
-        }
-
-        // Add card to stack
-        const newStacks = cardStacks.slice(0);
-        matchingStack.push(card);
-        setCardStacks(newStacks);
-
-        const newPile = drawPile.slice(0);
-        newPile.pop();
-        setDrawPile(newPile);
-        updateUndoStack({ cardStacks: newStacks, drawPile: newPile });
-    };
-
-    const drawCardsClicked = () => {
-        let newDeck: CardProps[];
-        let newPile: CardProps[];
-        if (drawDeck.length == 0) {
-            newDeck = drawPile.slice(0).reverse();
-            newPile = [];
-        }
-        else {
-            newDeck = drawDeck.slice(0)
-            newPile = drawPile.slice(0);
-        }
-
-        const poppedCards = [
-            newDeck.pop(),
-            newDeck.pop(),
-            newDeck.pop()
-        ].filter(x => x !== null && x !== undefined);
-        newPile.push(...poppedCards);
-
-        setDrawDeck(newDeck);
-        setDrawPile(newPile);
-        updateUndoStack({ drawDeck: newDeck, drawPile: newPile });
-    };
-
-    const undoClicked = () => {
-        if (undoStack.length < 2) {
-            return;
-        }
-
-        const newStack = undoStack.slice(0);
-        newStack.pop();
-        if (newStack.length == 0) {
-            return;
-        }
-
-        const revertState = newStack[newStack.length - 1];
-        setCardColumns(
-            revertState.cardColumns!.map((col) => col.map(item => structuredClone(item)))
-        );
-        setCardStacks(
-            revertState.cardStacks!.map((stack) => stack.map(item => structuredClone(item)))
-        );
-
-        setDrawDeck(revertState.drawDeck!.map(item => structuredClone(item)));
-        setDrawPile(revertState.drawPile!.map(item => structuredClone(item)));
-
-        setUndoStack(newStack);
-        setShowAutoSolve(
-            canAutoSolve(revertState)
-        );
-    }
-
-    const solveNextCard = () => {
-        if (solveIntervalRef.current) {
-            clearInterval(solveIntervalRef.current);
-        }
-        solveIntervalRef.current = setInterval(() => {
-            let allStacksEmpty = true;
-            for (let i = 0; i < cardColumns.length; i++) {
-                const column = cardColumns[i];
-                if (column.length == 0) {
-                    continue;
-                }
-                allStacksEmpty = false;
-                const card = column[column.length - 1];
-                const [canBank, stack] = canSendCardToStack(card, cardStacks);
-                if (!canBank) {
-                    continue
-                }
-
-                // Remove from column
-                column.pop();
-                // Add to stack
-                stack!.push(card);
-
-                setCardColumns(cardColumns);
-                setCardStacks(cardStacks);
-                break;
-            }
-            forceUpdate();
-
-
-            if (allStacksEmpty) {
-                setSolving(false);
-                setShowWinBanner(true);
-                if (solveIntervalRef.current) {
-                    clearInterval(solveIntervalRef.current);
-                }
-            }
-        }, 250);
-    }
-
-    if (isSolving) {
-        solveNextCard();
-    }
-
-    const autoSolveClicked = () => {
-        setSolving(true);
-        solveNextCard();
-        setShowAutoSolve(false);
+        // snapshot.cardColumns = newColumns;
+        // updateUndoStack(snapshot);
     };
 
     return (
         <>
             <div className="top-row">
-                <DeckStack deck={drawDeck} playedCards={drawPile} cardRightClicked={deckCardRightClicked} drawCardsClicked={drawCardsClicked} />
-                <div className="deck-spacer"></div>
+                <div className="free-cells row">
+                    <FreeStack></FreeStack>
+                    <FreeStack></FreeStack>
+                    <FreeStack></FreeStack>
+                    <FreeStack></FreeStack>
+                </div>
+                <div className='bank-spacer'></div>
                 <div className="card-stacks row">
                     <CardStack cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
                     <CardStack cards={cardStacks[1]} onCardDropped={(card) => onStackCardDrop(card, 1)}></CardStack>
                     <CardStack cards={cardStacks[2]} onCardDropped={(card) => onStackCardDrop(card, 2)}></CardStack>
                     <CardStack cards={cardStacks[3]} onCardDropped={(card) => onStackCardDrop(card, 3)}></CardStack>
                 </div>
-            </div>
-            <div>
+            </div><div>
                 <div className='card-columns'>
+                    <div className='column-spacer'></div>
                     <CardColumn cards={cardColumns[0]} cardRightClicked={(card) => columnCardRightClicked(card, 0)} onCardDropped={(card) => onColumnCardDrop(card, 0)}></CardColumn>
                     <CardColumn cards={cardColumns[1]} cardRightClicked={(card) => columnCardRightClicked(card, 1)} onCardDropped={(card) => onColumnCardDrop(card, 1)}></CardColumn>
                     <CardColumn cards={cardColumns[2]} cardRightClicked={(card) => columnCardRightClicked(card, 2)} onCardDropped={(card) => onColumnCardDrop(card, 2)}></CardColumn>
@@ -504,12 +304,13 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
                     <CardColumn cards={cardColumns[4]} cardRightClicked={(card) => columnCardRightClicked(card, 4)} onCardDropped={(card) => onColumnCardDrop(card, 4)}></CardColumn>
                     <CardColumn cards={cardColumns[5]} cardRightClicked={(card) => columnCardRightClicked(card, 5)} onCardDropped={(card) => onColumnCardDrop(card, 5)}></CardColumn>
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
+                    <CardColumn cards={cardColumns[7]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 7)}></CardColumn>
                 </div>
-            </div>
-            <SidePanel ref={sidepanelRef} activeVariant={Variant.Klondike} newGameClicked={startNewGame} undoClicked={undoClicked} showAutoSolve={showAutoSolve} autoSolveClicked={autoSolveClicked} variantSelected={onVariantChanged}></SidePanel>
+            </div><SidePanel ref={sidepanelRef} activeVariant={Variant.Freecell} newGameClicked={startNewGame} undoClicked={console.log} showAutoSolve={false} autoSolveClicked={console.log} variantSelected={onVariantChanged}></SidePanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
-    )
+
+    );
 }
 
-export default Klondike;
+export default Freecell;

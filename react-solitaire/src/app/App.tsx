@@ -1,9 +1,16 @@
 import './App.css'
 import Klondike from '../components/klondike/Klondike.tsx';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Variant } from '../shared/variants.ts';
+import Freecell from '../components/freecell/Freecell.tsx';
 
 function App() {
+    useEffect(() => {
+        document.body.addEventListener('dragover', (event) => {
+            event.preventDefault();
+        });
+    });
+
     const [activeCardGame, setActiveCardGame] = useState(Variant.Klondike);
 
     const changeVariant = (variant: Variant) => {
@@ -16,7 +23,7 @@ function App() {
             cardGameElement = <Klondike onVariantChanged={changeVariant}></Klondike>;
             break;
         case Variant.Freecell:
-            cardGameElement = <div>No Freecell yet :(</div>
+            cardGameElement = <Freecell onVariantChanged={changeVariant}></Freecell>
             break;
     }
 
