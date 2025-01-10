@@ -1,12 +1,15 @@
 import { ForwardedRef, forwardRef, useImperativeHandle, useRef } from 'react';
 import './SidePanel.css';
 import Stopwatch, { StopwatchHandle } from './stopwatch/Stopwatch';
+import { Variant } from '../../shared/variants';
 
 export interface SidePanelProps {
     showAutoSolve: boolean,
+    activeVariant: Variant,
     newGameClicked: () => void,
     undoClicked: () => void,
-    autoSolveClicked: () => void
+    autoSolveClicked: () => void,
+    variantSelected: (variant: Variant) => void
 }
 
 export interface SidePanelHandles {
@@ -14,7 +17,7 @@ export interface SidePanelHandles {
     resetTimer: () => void,
 }
 
-const SidePanel = forwardRef(function SidePanel({ showAutoSolve, newGameClicked, undoClicked, autoSolveClicked }: SidePanelProps, ref: ForwardedRef<unknown>) {
+const SidePanel = forwardRef(function SidePanel({ showAutoSolve, activeVariant, newGameClicked, undoClicked, autoSolveClicked, variantSelected }: SidePanelProps, ref: ForwardedRef<unknown>) {
     const stopwatchRef = useRef<StopwatchHandle>(null);
 
     useImperativeHandle(ref, () => {
@@ -28,10 +31,21 @@ const SidePanel = forwardRef(function SidePanel({ showAutoSolve, newGameClicked,
         }
     });
 
+    const onOptionSelected = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const cardGameVariant: Variant = Variant[event.target.value as keyof typeof Variant];
+        variantSelected(cardGameVariant);
+    };
+
     return (
         <div id='side-panel'>
             <div className='side-column'>
                 <div className='button-column'>
+                    <div className='card-game-group'>
+                        <label>Card Game</label>
+                        <select className='panel-dropdown' onChange={onOptionSelected} value={activeVariant}>
+                            {Object.keys(Variant).map(variant => <option>{variant}</option>)}
+                        </select>
+                    </div>
                     <button onClick={newGameClicked} className='panel-button'>New Game</button>
                     <button onClick={undoClicked} className='panel-button'>Undo Move</button>
                 </div>
