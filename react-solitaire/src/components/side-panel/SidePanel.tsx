@@ -43,7 +43,7 @@ const SidePanel = forwardRef(function SidePanel({ showAutoSolve, activeVariant, 
                     <div className='card-game-group'>
                         <label>Card Game</label>
                         <select className='panel-dropdown' onChange={onOptionSelected} value={activeVariant}>
-                            {Object.keys(Variant).map(variant => <option>{variant}</option>)}
+                            {Object.keys(Variant).map(variant => <option key={variant}>{variant}</option>)}
                         </select>
                     </div>
                     <button onClick={newGameClicked} className='panel-button'>New Game</button>

@@ -18,19 +18,13 @@ function buildColumns(startingDeck: CardProps[]) {
         for (let i = 0; i < columns.length; i++) {
             const popCard = startingDeck.pop();
             if (!popCard) {
-                continue
+                break;
             }
+            popCard.isFaceDown = false;
             popCard.source = CardSource.CardColumn;
             columns[i].push(popCard);
         }
     }
-
-    columns.forEach((column) => {
-        if (column.length == 0) {
-            return;
-        }
-        column[column.length - 1].isFaceDown = false;
-    });
     return columns;
 }
 
