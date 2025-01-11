@@ -22,7 +22,6 @@ const Stopwatch = forwardRef(function Stopwatch({ },ref: ForwardedRef<unknown>) 
                 }
             },
             reset() {
-                console.log('setting start time');
                 setStartTime(Date.now());
             }
         }

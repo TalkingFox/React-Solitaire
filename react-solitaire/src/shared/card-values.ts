@@ -1,3 +1,5 @@
+import { CardSuit } from "./enums"
+
 export const CARD_TEXT_BY_VALUE: Record<number, string> = {
     1: 'A',
     2: '2',
@@ -28,4 +30,10 @@ export const CARD_VALUE_BY_TEXT: Record<string, number> = {
     'J': 11,
     'Q': 12,
     'K': 13
+}
+
+export function doSuitsAlternate(suitA: CardSuit, suitB: CardSuit): boolean {
+    const isABlack = (suitA == CardSuit.Clubs || suitA == CardSuit.Spades);
+    const isBBlack = (suitB == CardSuit.Clubs || suitB == CardSuit.Spades);
+    return isABlack != isBBlack;
 }

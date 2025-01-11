@@ -6,10 +6,11 @@ import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element
 
 export interface CardStackProps {
     cards: CardProps[],
+    isDraggable: boolean,
     onCardDropped: (card: CardProps) => void
 }
 
-function CardStack({ cards, onCardDropped }: CardStackProps) {
+function CardStack({ cards, isDraggable, onCardDropped }: CardStackProps) {
     const ref = useRef(null);
     useEffect(() => {
         const el = ref.current;
@@ -25,13 +26,27 @@ function CardStack({ cards, onCardDropped }: CardStackProps) {
     });
 
     let displayCards: JSX.Element[] = []
+    if (cards.length == 0) {
+        const emptyStack = (
+            <div className='empty-stack' key={crypto.randomUUID()}>                <div className='empty-stack-row'>
+                <span>♠</span>
+                <span>♥</span>
+            </div>
+                <div className='empty-stack-row'>
+                    <span>♣</span>
+                    <span>♦</span>
+                </div>
+            </div>
+        );
+        displayCards.push(emptyStack);
+    }
     if (cards.length > 0) {
         const topCard = cards[cards.length - 1];
-        displayCards.push(<PlayingCard suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={1} key={crypto.randomUUID()}></PlayingCard>)
+        displayCards.push(<PlayingCard suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={1} isDraggable={isDraggable} key={crypto.randomUUID()}></PlayingCard>)
     }
     if (cards.length > 1) {
         const topCard = cards[cards.length - 2];
-        displayCards.push(<PlayingCard suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={0} key={crypto.randomUUID()}></PlayingCard>)
+        displayCards.push(<PlayingCard suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={0} isDraggable={isDraggable} key={crypto.randomUUID()}></PlayingCard>)
     }
     return (
         <div className='card card-stack' ref={ref}>

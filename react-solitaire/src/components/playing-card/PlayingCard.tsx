@@ -6,11 +6,13 @@ import { useDraggable } from '../../hooks/useDraggable'
 import { createPortal } from 'react-dom'
 import { previewStyles } from '../../shared/style'
 import { CardSuit } from '../../shared/enums'
+import { CARD_VALUE_BY_TEXT, doSuitsAlternate } from '../../shared/card-values'
 
 export enum CardSource {
     CardColumn,
     DrawPile,
-    CardStack
+    CardStack,
+    FreeStack
 }
 
 export interface CardProps {
@@ -32,6 +34,22 @@ const facesByText = new Map([
     ['Q', 'Queen'],
     ['K', 'King']
 ])
+
+function ChildrenAreInDescendingOrderWithAlternatingSuits(parent: CardProps, children: CardProps[]): boolean {
+    const allElements = [parent].concat(children);
+    for (let i = 0; i < allElements.length - 1; i++) {
+        const parentElement = allElements[i];
+        const childElement = allElements[i + 1];
+
+        const parentValue = CARD_VALUE_BY_TEXT[parentElement.text];
+        const childValue = CARD_VALUE_BY_TEXT[childElement.text];
+        const areAlternating = doSuitsAlternate(parentElement.suit, childElement.suit);
+        if (!areAlternating || ((parentValue - 1) != childValue)) {
+            return false;
+        }
+    }
+    return true;
+}
 
 function RenderFaceDownCard(onClick?: () => void) {
     return (
@@ -64,6 +82,11 @@ function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = tr
     const cardFace = facesByText.get(text) ?? ''
 
     const itemRef = useRef<HTMLDivElement>(null);
+
+    if (isDraggable && children && children.length > 0) {
+        isDraggable = ChildrenAreInDescendingOrderWithAlternatingSuits({ source: source, suit: suit, text: text }, children);
+    }
+
     const { state, preview, previewElement } = useDraggable({
         element: itemRef,
         getInitialData: () => ({ suit, text, source, children }),
@@ -89,12 +112,13 @@ function PlayingCard({ suit, text, isFaceDown = false, onClick, isDraggable = tr
     if (children.length > 0) {
         const grandChildren = children.slice(0);
         const childProps = grandChildren.shift() as CardProps;
+
         child = <PlayingCard
             suit={childProps.suit}
             text={childProps.text}
             children={grandChildren}
             source={childProps.source}
-            isDraggable={childProps.isDraggable}
+            isDraggable={!(childProps.isFaceDown ?? true)}
             isFaceDown={childProps.isFaceDown}
             onClick={onClick}
             onRightClick={onRightClick}
