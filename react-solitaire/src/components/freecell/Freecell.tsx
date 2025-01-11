@@ -194,8 +194,20 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         const column = cardColumns[columnIndex];
         const topCard = column[column.length - 1];
 
-        // any card can be placed on an empty column in Freecell
+        // Limit the number of dropped cards by the number of empty columns and cells present.
+        const emptyFreecells = freeCells.filter((cell) => cell == null).length;
+        let emptyColumns = cardColumns.filter((col) => col.length == 0).length;
+        if (column.length == 0) {
+            emptyColumns--;
+        }
+        const movingCardsLimit = (1 + emptyFreecells) * Math.pow(2, emptyColumns);
+        const movingCards = 1 + (card.children ?? []).length;
+        console.log(`Moving Cards: ${movingCards}. Limit: ${movingCardsLimit}`);
+        if (movingCards > movingCardsLimit) {
+            return;
+        }
 
+        // any card can be placed on an empty column in Freecell
         if (column.length > 0) {
             // check if card can be dropped on the column.
             // Must follow alternating suit and descending value rules.
@@ -212,7 +224,6 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                 return;
             }
         }
-
 
         // const snapshot: StateHistory = {};
 
