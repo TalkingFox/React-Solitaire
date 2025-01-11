@@ -66,6 +66,12 @@ function canSendCardToStack(card: CardProps, stacks: CardProps[][]): [boolean, C
     return [false, null]
 }
 
+interface FreecellStateHistory {
+    freeCells?: (CardProps | null)[],
+    cardStacks?: CardProps[][],
+    cardColumns?: CardProps[][],
+}
+
 function Freecell({ onVariantChanged }: SolitaireProps) {
     const startingDeck = useMemo(DeckBuilder.BuildDeck, []);
     const startingColumns = useMemo<CardProps[][]>(() => buildColumns(startingDeck), []);
@@ -74,6 +80,13 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
     const [freeCells, setFreeCells] = useState<(CardProps | null)[]>(new Array(4).fill(null));
     const [cardColumns, setCardColumns] = useState<CardProps[][]>(startingColumns);
     const [showWinBanner, setShowWinBanner] = useState(false);
+    const [undoStack, setUndoStack] = useState<FreecellStateHistory[]>([
+        {
+            cardColumns: cardColumns.map((col) => col.map(item => structuredClone(item))),
+            cardStacks: cardStacks.map((stack) => stack.map(item => structuredClone(item))),
+            freeCells: freeCells.map((cell) => structuredClone(cell))
+        }
+    ]);
 
     const sidepanelRef = useRef<SidePanelHandles>(null);
 
@@ -95,6 +108,18 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         setShowWinBanner(false);
     };
 
+    const updateUndoStack = (sourceData: FreecellStateHistory, clearStack: boolean = false) => {
+        const snapshot: FreecellStateHistory = {
+            cardColumns: (sourceData.cardColumns ?? cardColumns).map((col) => col.map(item => structuredClone(item))),
+            cardStacks: (sourceData.cardStacks ?? cardStacks).map((stack) => stack.map(item => structuredClone(item))),
+            freeCells: (sourceData.freeCells ?? freeCells).map((cell) => structuredClone(cell))
+        };
+
+        const newStack = clearStack ? [] : undoStack.slice(0);
+        newStack.push(snapshot);
+        setUndoStack(newStack);
+    };
+
     const startNewGame = () => {
         const newDeck = DeckBuilder.BuildDeck();
         const newColumns = buildColumns(newDeck);
@@ -107,12 +132,11 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         const newCells = new Array(4).fill(null);
         setFreeCells(newCells);
 
-        // updateUndoStack({
-        //     cardColumns: newColumns,
-        //     cardStacks: newStacks,
-        //     drawDeck: newDeck,
-        //     drawPile: []
-        // }, true);
+        updateUndoStack({
+            cardColumns: newColumns,
+            cardStacks: newStacks,
+            freeCells: newCells
+        }, true);
 
         sidepanelRef.current?.setTimerPaused(false);
         sidepanelRef.current?.resetTimer();
@@ -140,10 +164,10 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             newColumn[newColumn.length - 1].isFaceDown = false;
         }
         setCardColumns(newColumns);
-        // updateUndoStack({
-        //     cardColumns: newColumns,
-        //     cardStacks: newStacks
-        // });
+        updateUndoStack({
+            cardColumns: newColumns,
+            cardStacks: newStacks
+        });
     };
 
     const freeCellCardRightClicked = (card: CardProps) => {
@@ -163,10 +187,10 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         newCells[sourceIndex] = null;
 
         setFreeCells(newCells);
-        // updateUndoStack({
-        //     cardColumns: newColumns,
-        //     cardStacks: newStacks
-        // });
+        updateUndoStack({
+            freeCells: newCells,
+            cardStacks: newStacks
+        });
     }
 
     function onStackCardDrop(card: CardProps, stackIndex: number) {
@@ -183,7 +207,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         // Add card to stack
         const newStacks = cardStacks.slice(0);
 
-        // const snapshot: StateHistory = {};
+        const snapshot: FreecellStateHistory = {};
         // find card's source and remove it.
         if (card.source == CardSource.CardColumn) {
             const newColumns = cardColumns.slice(0);
@@ -199,7 +223,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                         column[column.length - 1].isFaceDown = false;
                     }
                     setCardColumns(newColumns);
-                    // snapshot.cardColumns = newColumns;
+                    snapshot.cardColumns = newColumns;
                     break;
                 }
             }
@@ -221,9 +245,8 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         card.source = CardSource.CardStack;
         stack.push(card);
         setCardStacks(newStacks);
-        // snapshot.cardStacks = newStacks;
-        // updateUndoStack(snapshot);
-
+        snapshot.cardStacks = newStacks;
+        updateUndoStack(snapshot);
     };
 
     function onColumnCardDrop(card: CardProps, columnIndex: number) {
@@ -260,7 +283,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             }
         }
 
-        // const snapshot: StateHistory = {};
+        const snapshot: FreecellStateHistory = {};
 
         // Add card to stack
         const newColumns = cardColumns.slice(0);
@@ -297,6 +320,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             const sourceIndex = newCells.findIndex((freeCard) => freeCard != null && freeCard.suit == card.suit && freeCard.text == card.text);
             newCells[sourceIndex] = null;
             setFreeCells(newCells);
+            snapshot.freeCells = newCells;
         }
         card.source = CardSource.CardColumn
         column.push(card)
@@ -307,8 +331,8 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             });
         }
         setCardColumns(newColumns);
-        // snapshot.cardColumns = newColumns;
-        // updateUndoStack(snapshot);
+        snapshot.cardColumns = newColumns;
+        updateUndoStack(snapshot);
     };
 
     function onFreeStackCardDrop(card: CardProps, stackIndex: number) {
@@ -323,9 +347,10 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
 
         const newCells = freeCells.slice(0);
 
-        // const snapshot = 'todo';
+        const snapshot: FreecellStateHistory = {};
         if (card.source == CardSource.CardColumn) {
             const newColumns = cardColumns.slice(0);
+            snapshot.cardColumns = newColumns
             for (let i = 0; i < newColumns.length; i++) {
                 const column = newColumns[i];
                 if (column.length == 0) {
@@ -335,7 +360,6 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                 if (card.suit == topCard.suit && card.text == topCard.text) {
                     column.pop();
                     setCardColumns(newColumns);
-                    // const snapshot = 'todo'
                     break;
                 }
             }
@@ -348,6 +372,36 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
 
         newCells[stackIndex] = card;
         setFreeCells(newCells);
+        snapshot.freeCells = newCells;
+        updateUndoStack(snapshot);
+    }
+
+    const undoClicked = () => {
+        if (undoStack.length < 2) {
+            return;
+        }
+
+        const newStack = undoStack.slice(0);
+        newStack.pop();
+        if (newStack.length == 0) {
+            return;
+        }
+
+        const revertState = newStack[newStack.length - 1];
+        setCardColumns(
+            revertState.cardColumns!.map((col) => col.map(item => structuredClone(item)))
+        );
+        setCardStacks(
+            revertState.cardStacks!.map((stack) => stack.map(item => structuredClone(item)))
+        );
+        setFreeCells(
+            revertState.freeCells!.map((cell) => structuredClone(cell))
+        );
+
+        setUndoStack(newStack);
+        // setShowAutoSolve(
+        //     canAutoSolve(revertState)
+        // );
     }
 
     return (
@@ -378,7 +432,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                     <CardColumn cards={cardColumns[7]} cardRightClicked={(card) => columnCardRightClicked(card, 7)} onCardDropped={(card) => onColumnCardDrop(card, 7)}></CardColumn>
                 </div>
-            </div><SidePanel ref={sidepanelRef} activeVariant={Variant.Freecell} newGameClicked={startNewGame} undoClicked={console.log} showAutoSolve={false} autoSolveClicked={console.log} variantSelected={onVariantChanged}></SidePanel>
+            </div><SidePanel ref={sidepanelRef} activeVariant={Variant.Freecell} newGameClicked={startNewGame} undoClicked={undoClicked} showAutoSolve={false} autoSolveClicked={console.log} variantSelected={onVariantChanged}></SidePanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
 

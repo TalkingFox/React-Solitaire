@@ -73,14 +73,14 @@ function canSendCardToStack(card: CardProps, stacks: CardProps[][]): [boolean, C
     return [false, null]
 }
 
-interface StateHistory {
+interface KlondikeStateHistory {
     drawDeck?: CardProps[],
     drawPile?: CardProps[],
     cardStacks?: CardProps[][],
     cardColumns?: CardProps[][],
 }
 
-function canAutoSolve(currentSnapshot: StateHistory): boolean {
+function canAutoSolve(currentSnapshot: KlondikeStateHistory): boolean {
     if (!currentSnapshot.cardColumns) {
         return false;
     }
@@ -110,7 +110,7 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
     const [showWinBanner, setShowWinBanner] = useState(false);
     const [drawDeck, setDrawDeck] = useState<CardProps[]>(startingDeck.slice(0));
     const [drawPile, setDrawPile] = useState<CardProps[]>([]);
-    const [undoStack, setUndoStack] = useState<StateHistory[]>([
+    const [undoStack, setUndoStack] = useState<KlondikeStateHistory[]>([
         {
             cardColumns: cardColumns.map((col) => col.map(item => structuredClone(item))),
             cardStacks: cardStacks.map((stack) => stack.map(item => structuredClone(item))),
@@ -156,8 +156,8 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
         setShowAutoSolve(false);
     };
 
-    const updateUndoStack = (sourceData: StateHistory, clearStack: boolean = false) => {
-        const snapshot: StateHistory = {
+    const updateUndoStack = (sourceData: KlondikeStateHistory, clearStack: boolean = false) => {
+        const snapshot: KlondikeStateHistory = {
             cardColumns: (sourceData.cardColumns ?? cardColumns).map((col) => col.map(item => structuredClone(item))),
             cardStacks: (sourceData.cardStacks ?? cardStacks).map((stack) => stack.map(item => structuredClone(item))),
             drawDeck: (sourceData.drawDeck ?? drawDeck).map((item) => structuredClone(item)),
@@ -224,7 +224,7 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
         // Add card to stack
         const newStacks = cardStacks.slice(0);
 
-        const snapshot: StateHistory = {};
+        const snapshot: KlondikeStateHistory = {};
         // find card's source and remove it.
         if (card.source == CardSource.DrawPile) {
             const newPile = drawPile.slice(0);
@@ -297,7 +297,7 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
             return;
         }
 
-        const snapshot: StateHistory = {};
+        const snapshot: KlondikeStateHistory = {};
 
         // Add card to stack
         const newColumns = cardColumns.slice(0);
