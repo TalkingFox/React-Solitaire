@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SolitaireProps } from '../../shared/solitaire-props';
 import { Variant } from '../../shared/variants';
 import CardColumn from '../card-column/CardColumn';
@@ -76,6 +76,19 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
     const [showWinBanner, setShowWinBanner] = useState(false);
 
     const sidepanelRef = useRef<SidePanelHandles>(null);
+
+    useEffect(() => {
+        const isGameWon = cardStacks.every((cardStack) => {
+            return cardStack.length == 13;
+        });
+
+        if (!isGameWon) {
+            return;
+        }
+
+        setShowWinBanner(true);
+        sidepanelRef.current?.setTimerPaused(true);
+    }, [cardStacks]);
 
     const onHideWinBanner = () => {
         sidepanelRef.current?.setTimerPaused(true);
@@ -225,7 +238,6 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         }
         const movingCardsLimit = (1 + emptyFreecells) * Math.pow(2, emptyColumns);
         const movingCards = 1 + (card.children ?? []).length;
-        console.log(`Moving Cards: ${movingCards}. Limit: ${movingCardsLimit}`);
         if (movingCards > movingCardsLimit) {
             return;
         }
@@ -300,7 +312,6 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
     };
 
     function onFreeStackCardDrop(card: CardProps, stackIndex: number) {
-        console.log('onFreeStackCardDrop');
         if ((card.children ?? []).length > 0) {
             return;
         }
