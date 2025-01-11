@@ -248,7 +248,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         }
         else if (card.source == CardSource.FreeStack) {
             const newCells = freeCells.slice(0);
-            const sourceIndex = newCells.findIndex((freeCard) => freeCard != null && freeCard.suit == card.suit && freeCard.text == freeCard.text);
+            const sourceIndex = newCells.findIndex((freeCard) => freeCard != null && freeCard.suit == card.suit && freeCard.text == card.text);
             newCells[sourceIndex] = null;
             setFreeCells(newCells);
         }
@@ -266,6 +266,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
     };
 
     function onFreeStackCardDrop(card: CardProps, stackIndex: number) {
+        console.log('onFreeStackCardDrop');
         if ((card.children ?? []).length > 0) {
             return;
         }
@@ -330,7 +331,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                     <CardColumn cards={cardColumns[4]} cardRightClicked={(card) => columnCardRightClicked(card, 4)} onCardDropped={(card) => onColumnCardDrop(card, 4)}></CardColumn>
                     <CardColumn cards={cardColumns[5]} cardRightClicked={(card) => columnCardRightClicked(card, 5)} onCardDropped={(card) => onColumnCardDrop(card, 5)}></CardColumn>
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
-                    <CardColumn cards={cardColumns[7]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 7)}></CardColumn>
+                    <CardColumn cards={cardColumns[7]} cardRightClicked={(card) => columnCardRightClicked(card, 7)} onCardDropped={(card) => onColumnCardDrop(card, 7)}></CardColumn>
                 </div>
             </div><SidePanel ref={sidepanelRef} activeVariant={Variant.Freecell} newGameClicked={startNewGame} undoClicked={console.log} showAutoSolve={false} autoSolveClicked={console.log} variantSelected={onVariantChanged}></SidePanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
