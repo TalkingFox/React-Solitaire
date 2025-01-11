@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { SolitaireProps } from '../../shared/solitaire-props';
 import { Variant } from '../../shared/variants';
 import CardColumn from '../card-column/CardColumn';
@@ -8,7 +8,7 @@ import WinBanner from '../win-banner/WinBanner';
 import './Freecell.css';
 import { CardProps, CardSource } from '../playing-card/PlayingCard';
 import { DeckBuilder } from '../../shared/deck-builder';
-import { CARD_VALUE_BY_TEXT, CARD_TEXT_BY_VALUE } from '../../shared/card-values';
+import { CARD_VALUE_BY_TEXT, CARD_TEXT_BY_VALUE, doSuitsAlternate } from '../../shared/card-values';
 import { CardSuit } from '../../shared/enums';
 import FreeStack from '../free-stack/FreeStack';
 
@@ -66,6 +66,35 @@ function canSendCardToStack(card: CardProps, stacks: CardProps[][]): [boolean, C
     return [false, null]
 }
 
+function StackIsInDescendingOrderWithAlternatingSuits(stack: CardProps[]): boolean {
+    for (let i = 0; i < stack.length - 1; i++) {
+        const parentElement = stack[i];
+        const childElement = stack[i + 1];
+
+        const parentValue = CARD_VALUE_BY_TEXT[parentElement.text];
+        const childValue = CARD_VALUE_BY_TEXT[childElement.text];
+        const areAlternating = doSuitsAlternate(parentElement.suit, childElement.suit);
+        if (!areAlternating || ((parentValue - 1) != childValue)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function canAutoSolve(currentSnapshot: FreecellStateHistory): boolean {
+    if (!currentSnapshot.cardColumns) {
+        return false;
+    }
+
+    for (let i = 0; i < currentSnapshot.cardColumns.length; i++) {
+        const column = currentSnapshot.cardColumns[i];
+        if (!StackIsInDescendingOrderWithAlternatingSuits(column)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 interface FreecellStateHistory {
     freeCells?: (CardProps | null)[],
     cardStacks?: CardProps[][],
@@ -87,6 +116,10 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             freeCells: freeCells.map((cell) => structuredClone(cell))
         }
     ]);
+    const [showAutoSolve, setShowAutoSolve] = useState(false);
+    const [isSolving, setSolving] = useState(false);
+    const solveIntervalRef = useRef<number | null>(null);
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
     const sidepanelRef = useRef<SidePanelHandles>(null);
 
@@ -118,6 +151,9 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         const newStack = clearStack ? [] : undoStack.slice(0);
         newStack.push(snapshot);
         setUndoStack(newStack);
+        setShowAutoSolve(
+            canAutoSolve(snapshot)
+        );
     };
 
     const startNewGame = () => {
@@ -142,7 +178,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         sidepanelRef.current?.resetTimer();
 
         setShowWinBanner(false);
-        // setShowAutoSolve(false);
+        setShowAutoSolve(false);
     };
 
     const columnCardRightClicked = (card: CardProps, columnIndex: number) => {
@@ -399,10 +435,87 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         );
 
         setUndoStack(newStack);
-        // setShowAutoSolve(
-        //     canAutoSolve(revertState)
-        // );
+        setShowAutoSolve(
+            canAutoSolve(revertState)
+        );
     }
+
+    const solveNextCard = () => {
+        if (solveIntervalRef.current) {
+            clearInterval(solveIntervalRef.current);
+        }
+        solveIntervalRef.current = setInterval(() => {
+            let allStacksEmpty = true;
+            let cellsEmpty = true;
+            let poppedFromColumn = false;
+            for (let i = 0; i < cardColumns.length; i++) {
+                const column = cardColumns[i];
+                if (column.length == 0) {
+                    continue;
+                }
+                allStacksEmpty = false;
+                const card = column[column.length - 1];
+                const [canBank, stack] = canSendCardToStack(card, cardStacks);
+                if (!canBank) {
+                    continue
+                }
+
+                // Remove from column
+                column.pop();
+                poppedFromColumn = true;
+                // Add to stack
+                stack!.push(card);
+
+                setCardColumns(cardColumns);
+                setCardStacks(cardStacks);
+                break;
+            }
+            if (!poppedFromColumn) {
+                for (let i = 0; i < freeCells.length; i++) {
+                    const card = freeCells[i];
+                    if (card == null) {
+                        continue;
+                    }
+                    cellsEmpty = false;
+                    const [canBank, stack] = canSendCardToStack(card, cardStacks);
+                    if (!canBank) {
+                        continue
+                    }
+
+                    // Free the cell
+                    const newCells = freeCells.slice(0);
+                    newCells[i] = null;
+                    // Add to stack
+                    stack!.push(card);
+
+                    setFreeCells(newCells);
+                    setCardStacks(cardStacks);
+                    break;
+                }
+            }
+            forceUpdate();
+
+
+            if (allStacksEmpty && cellsEmpty) {
+                setSolving(false);
+                setShowWinBanner(true);
+                sidepanelRef.current?.setTimerPaused(true);
+                if (solveIntervalRef.current) {
+                    clearInterval(solveIntervalRef.current);
+                }
+            }
+        }, 100);
+    }
+
+    if (isSolving) {
+        solveNextCard();
+    }
+
+    const autoSolveClicked = () => {
+        setSolving(true);
+        solveNextCard();
+        setShowAutoSolve(false);
+    };
 
     return (
         <>
@@ -432,7 +545,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                     <CardColumn cards={cardColumns[7]} cardRightClicked={(card) => columnCardRightClicked(card, 7)} onCardDropped={(card) => onColumnCardDrop(card, 7)}></CardColumn>
                 </div>
-            </div><SidePanel ref={sidepanelRef} activeVariant={Variant.Freecell} newGameClicked={startNewGame} undoClicked={undoClicked} showAutoSolve={false} autoSolveClicked={console.log} variantSelected={onVariantChanged}></SidePanel>
+            </div><SidePanel ref={sidepanelRef} activeVariant={Variant.Freecell} newGameClicked={startNewGame} undoClicked={undoClicked} showAutoSolve={showAutoSolve} autoSolveClicked={autoSolveClicked} variantSelected={onVariantChanged}></SidePanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
 

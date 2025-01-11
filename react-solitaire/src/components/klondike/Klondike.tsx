@@ -466,11 +466,12 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
             if (allStacksEmpty) {
                 setSolving(false);
                 setShowWinBanner(true);
+                sidepanelRef.current?.setTimerPaused(true);
                 if (solveIntervalRef.current) {
                     clearInterval(solveIntervalRef.current);
                 }
             }
-        }, 250);
+        }, 100);
     }
 
     if (isSolving) {
