@@ -6,10 +6,11 @@ import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element
 
 export interface FreeStackProps {
     card: CardProps | null,
-    onCardDropped: (card: CardProps) => void
+    onCardDropped: (card: CardProps) => void,
+    onCardRightClicked: (card: CardProps) => void
 }
 
-function FreeStack({ card, onCardDropped }: FreeStackProps) {
+function FreeStack({ card, onCardDropped, onCardRightClicked }: FreeStackProps) {
     const ref = useRef(null);
     useEffect(() => {
         const el = ref.current;
@@ -29,7 +30,7 @@ function FreeStack({ card, onCardDropped }: FreeStackProps) {
 
     let cardElement: (JSX.Element | undefined) = undefined;
     if (card) {
-        cardElement = <PlayingCard suit={card.suit} source={CardSource.FreeStack} text={card.text} isFaceDown={false}></PlayingCard>
+        cardElement = <PlayingCard suit={card.suit} source={CardSource.FreeStack} text={card.text} isFaceDown={false} onRightClick={onCardRightClicked}></PlayingCard>
     }
 
 

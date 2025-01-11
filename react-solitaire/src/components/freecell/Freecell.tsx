@@ -133,6 +133,29 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         // });
     };
 
+    const freeCellCardRightClicked = (card: CardProps) => {
+        const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
+        if (!canSendCard || !matchingStack) {
+            return;
+        }
+
+        // Add card to stack
+        const newStacks = cardStacks.slice(0);
+        matchingStack.push(card);
+        setCardStacks(newStacks);
+
+        // Clear cell
+        const newCells = freeCells.slice(0);
+        const sourceIndex = newCells.findIndex((cell) => cell != null && cell.suit == card.suit && cell.text == card.text);
+        newCells[sourceIndex] = null;
+
+        setFreeCells(newCells);
+        // updateUndoStack({
+        //     cardColumns: newColumns,
+        //     cardStacks: newStacks
+        // });
+    }
+
     function onStackCardDrop(card: CardProps, stackIndex: number) {
         if ((card.children ?? []).length > 0) {
             return;
@@ -320,10 +343,10 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         <>
             <div className="top-row">
                 <div className="free-cells row">
-                    <FreeStack card={freeCells[0]} onCardDropped={(card) => onFreeStackCardDrop(card, 0)}></FreeStack>
-                    <FreeStack card={freeCells[1]} onCardDropped={(card) => onFreeStackCardDrop(card, 1)}></FreeStack>
-                    <FreeStack card={freeCells[2]} onCardDropped={(card) => onFreeStackCardDrop(card, 2)}></FreeStack>
-                    <FreeStack card={freeCells[3]} onCardDropped={(card) => onFreeStackCardDrop(card, 3)}></FreeStack>
+                    <FreeStack card={freeCells[0]} onCardDropped={(card) => onFreeStackCardDrop(card, 0)} onCardRightClicked={freeCellCardRightClicked}></FreeStack>
+                    <FreeStack card={freeCells[1]} onCardDropped={(card) => onFreeStackCardDrop(card, 1)} onCardRightClicked={freeCellCardRightClicked}></FreeStack>
+                    <FreeStack card={freeCells[2]} onCardDropped={(card) => onFreeStackCardDrop(card, 2)} onCardRightClicked={freeCellCardRightClicked}></FreeStack>
+                    <FreeStack card={freeCells[3]} onCardDropped={(card) => onFreeStackCardDrop(card, 3)} onCardRightClicked={freeCellCardRightClicked}></FreeStack>
                 </div>
                 <div className='bank-spacer'></div>
                 <div className="card-stacks row">
