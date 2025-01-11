@@ -489,10 +489,10 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
                 <DeckStack deck={drawDeck} playedCards={drawPile} cardRightClicked={deckCardRightClicked} drawCardsClicked={drawCardsClicked} />
                 <div className="deck-spacer"></div>
                 <div className="card-stacks row">
-                    <CardStack cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
-                    <CardStack cards={cardStacks[1]} onCardDropped={(card) => onStackCardDrop(card, 1)}></CardStack>
-                    <CardStack cards={cardStacks[2]} onCardDropped={(card) => onStackCardDrop(card, 2)}></CardStack>
-                    <CardStack cards={cardStacks[3]} onCardDropped={(card) => onStackCardDrop(card, 3)}></CardStack>
+                    <CardStack cards={cardStacks[0]} isDraggable={true} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
+                    <CardStack cards={cardStacks[1]} isDraggable={true} onCardDropped={(card) => onStackCardDrop(card, 1)}></CardStack>
+                    <CardStack cards={cardStacks[2]} isDraggable={true} onCardDropped={(card) => onStackCardDrop(card, 2)}></CardStack>
+                    <CardStack cards={cardStacks[3]} isDraggable={true} onCardDropped={(card) => onStackCardDrop(card, 3)}></CardStack>
                 </div>
             </div>
             <div>

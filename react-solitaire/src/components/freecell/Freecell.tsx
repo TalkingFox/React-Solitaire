@@ -71,7 +71,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
     const startingColumns = useMemo<CardProps[][]>(() => buildColumns(startingDeck), []);
 
     const [cardStacks, setCardStacks] = useState<CardProps[][]>([[], [], [], []]);
-    const [freeCells, setFreeCells] = useState<CardProps[]>([]);
+    const [freeCells, setFreeCells] = useState<(CardProps | null)[]>(new Array(4).fill(null));
     const [cardColumns, setCardColumns] = useState<CardProps[][]>(startingColumns);
     const [showWinBanner, setShowWinBanner] = useState(false);
 
@@ -90,6 +90,9 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
 
         const newStacks = [[], [], [], []];
         setCardStacks(newStacks);
+
+        const newCells = new Array(4).fill(null);
+        setFreeCells(newCells);
 
         // updateUndoStack({
         //     cardColumns: newColumns,
@@ -191,9 +194,9 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         const column = cardColumns[columnIndex];
         const topCard = column[column.length - 1];
 
-        let expectedValue = CARD_VALUE_BY_TEXT['K'];
-        if (column.length > 0) {
+        // any card can be placed on an empty column in Freecell
 
+        if (column.length > 0) {
             // check if card can be dropped on the column.
             // Must follow alternating suit and descending value rules.
             const isCardRed = card.suit in [CardSuit.Diamonds, CardSuit.Hearts];
@@ -203,13 +206,13 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             }
 
             const topCardValue = CARD_VALUE_BY_TEXT[topCard.text];
-            expectedValue = topCardValue - 1;
+            const expectedValue = topCardValue - 1;
+            const expectedText = CARD_TEXT_BY_VALUE[expectedValue];
+            if (card.text != expectedText) {
+                return;
+            }
         }
 
-        const expectedText = CARD_TEXT_BY_VALUE[expectedValue];
-        if (card.text != expectedText) {
-            return;
-        }
 
         // const snapshot: StateHistory = {};
 
@@ -243,21 +246,11 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                 }
             }
         }
-        else if (card.source == CardSource.CardStack) {
-            const newStacks = cardStacks.slice(0);
-            for (let i = 0; i < newStacks.length; i++) {
-                const stack = newStacks[i];
-                if (stack.length == 0) {
-                    continue;
-                }
-                const topCard = stack[stack.length - 1];
-                if (card.suit == topCard.suit && card.text == topCard.text) {
-                    stack.pop();
-                    setCardStacks(newStacks);
-                    // snapshot.cardStacks = newStacks;
-                    break;
-                }
-            }
+        else if (card.source == CardSource.FreeStack) {
+            const newCells = freeCells.slice(0);
+            const sourceIndex = newCells.findIndex((freeCard) => freeCard != null && freeCard.suit == card.suit && freeCard.text == freeCard.text);
+            newCells[sourceIndex] = null;
+            setFreeCells(newCells);
         }
         card.source = CardSource.CardColumn
         column.push(card)
@@ -272,21 +265,60 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         // updateUndoStack(snapshot);
     };
 
+    function onFreeStackCardDrop(card: CardProps, stackIndex: number) {
+        if ((card.children ?? []).length > 0) {
+            return;
+        }
+
+        const stackCard = freeCells[stackIndex];
+        if (stackCard) {
+            return;
+        }
+
+        const newCells = freeCells.slice(0);
+
+        // const snapshot = 'todo';
+        if (card.source == CardSource.CardColumn) {
+            const newColumns = cardColumns.slice(0);
+            for (let i = 0; i < newColumns.length; i++) {
+                const column = newColumns[i];
+                if (column.length == 0) {
+                    continue;
+                }
+                const topCard = column[column.length - 1];
+                if (card.suit == topCard.suit && card.text == topCard.text) {
+                    column.pop();
+                    setCardColumns(newColumns);
+                    // const snapshot = 'todo'
+                    break;
+                }
+            }
+        }
+        else if (card.source == CardSource.FreeStack) {
+            const sourceIndex = newCells
+                .findIndex((freeCard) => freeCard != null && freeCard.text == card.text && freeCard.suit == card.suit);
+            newCells[sourceIndex] = null;
+        }
+
+        newCells[stackIndex] = card;
+        setFreeCells(newCells);
+    }
+
     return (
         <>
             <div className="top-row">
                 <div className="free-cells row">
-                    <FreeStack></FreeStack>
-                    <FreeStack></FreeStack>
-                    <FreeStack></FreeStack>
-                    <FreeStack></FreeStack>
+                    <FreeStack card={freeCells[0]} onCardDropped={(card) => onFreeStackCardDrop(card, 0)}></FreeStack>
+                    <FreeStack card={freeCells[1]} onCardDropped={(card) => onFreeStackCardDrop(card, 1)}></FreeStack>
+                    <FreeStack card={freeCells[2]} onCardDropped={(card) => onFreeStackCardDrop(card, 2)}></FreeStack>
+                    <FreeStack card={freeCells[3]} onCardDropped={(card) => onFreeStackCardDrop(card, 3)}></FreeStack>
                 </div>
                 <div className='bank-spacer'></div>
                 <div className="card-stacks row">
-                    <CardStack cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
-                    <CardStack cards={cardStacks[1]} onCardDropped={(card) => onStackCardDrop(card, 1)}></CardStack>
-                    <CardStack cards={cardStacks[2]} onCardDropped={(card) => onStackCardDrop(card, 2)}></CardStack>
-                    <CardStack cards={cardStacks[3]} onCardDropped={(card) => onStackCardDrop(card, 3)}></CardStack>
+                    <CardStack isDraggable={false} cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
+                    <CardStack isDraggable={false} cards={cardStacks[1]} onCardDropped={(card) => onStackCardDrop(card, 1)}></CardStack>
+                    <CardStack isDraggable={false} cards={cardStacks[2]} onCardDropped={(card) => onStackCardDrop(card, 2)}></CardStack>
+                    <CardStack isDraggable={false} cards={cardStacks[3]} onCardDropped={(card) => onStackCardDrop(card, 3)}></CardStack>
                 </div>
             </div><div>
                 <div className='card-columns'>
