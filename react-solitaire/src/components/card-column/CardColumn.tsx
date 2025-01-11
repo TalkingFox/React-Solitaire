@@ -3,7 +3,6 @@ import PlayingCard, { CardProps, CardSource } from '../playing-card/PlayingCard'
 import './CardColumn.css'
 import invariant from 'tiny-invariant';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { CARD_VALUE_BY_TEXT } from '../../shared/card-values';
 
 export interface CardColumnProps {
     cards: CardProps[],
