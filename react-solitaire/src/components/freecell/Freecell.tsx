@@ -358,6 +358,22 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             setFreeCells(newCells);
             snapshot.freeCells = newCells;
         }
+        else if (card.source == CardSource.CardStack) {
+            const newStacks = cardStacks.slice(0);
+            snapshot.cardStacks = newStacks;
+            for (let i = 0; i < newStacks.length; i++) {
+                const stack = newStacks[i];
+                if (stack.length == 0) {
+                    continue;
+                }
+                const topCard = stack[stack.length-1];
+                if (topCard.suit == card.suit && topCard.text == card.text) { 
+                    stack.pop();
+                    break;
+                }
+            }
+            setCardStacks(newStacks);
+        }
         card.source = CardSource.CardColumn
         column.push(card)
         if (card.children) {
@@ -404,6 +420,22 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             const sourceIndex = newCells
                 .findIndex((freeCard) => freeCard != null && freeCard.text == card.text && freeCard.suit == card.suit);
             newCells[sourceIndex] = null;
+        }
+        else if (card.source == CardSource.CardStack) {
+            const newStacks = cardStacks.slice(0);
+            snapshot.cardStacks = newStacks;
+            for (let i = 0; i < newStacks.length; i++) {
+                const stack = newStacks[i];
+                if (stack.length == 0) {
+                    continue;
+                }
+                const topCard = stack[stack.length-1];
+                if (topCard.suit == card.suit && topCard.text == card.text) { 
+                    stack.pop();
+                    break;
+                }
+            }
+            setCardStacks(newStacks);
         }
 
         newCells[stackIndex] = card;
@@ -528,10 +560,10 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                 </div>
                 <div className='bank-spacer'></div>
                 <div className="card-stacks row">
-                    <CardStack isDraggable={false} cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
-                    <CardStack isDraggable={false} cards={cardStacks[1]} onCardDropped={(card) => onStackCardDrop(card, 1)}></CardStack>
-                    <CardStack isDraggable={false} cards={cardStacks[2]} onCardDropped={(card) => onStackCardDrop(card, 2)}></CardStack>
-                    <CardStack isDraggable={false} cards={cardStacks[3]} onCardDropped={(card) => onStackCardDrop(card, 3)}></CardStack>
+                    <CardStack isDraggable={true} cards={cardStacks[0]} onCardDropped={(card) => onStackCardDrop(card, 0)}></CardStack>
+                    <CardStack isDraggable={true} cards={cardStacks[1]} onCardDropped={(card) => onStackCardDrop(card, 1)}></CardStack>
+                    <CardStack isDraggable={true} cards={cardStacks[2]} onCardDropped={(card) => onStackCardDrop(card, 2)}></CardStack>
+                    <CardStack isDraggable={true} cards={cardStacks[3]} onCardDropped={(card) => onStackCardDrop(card, 3)}></CardStack>
                 </div>
             </div><div>
                 <div className='card-columns'>
