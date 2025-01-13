@@ -42,7 +42,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.DEPLOYER_SECRET_KEY }}
           aws-region: us-east-1
           role-to-assume: ${{ secrets.DEPLOYER_ROLE }}
-          role-duration-seconds: 300
+          role-duration-seconds: 900
           role-session-name: DeploySolitaire
 
       - name: Upload To S3
@@ -53,5 +53,3 @@ jobs:
           aws s3 sync . "s3://$env:WEB_BUCKET" --delete
           aws cloudfront create-invalidation --distribution-id $CLOUDFRONT
         working-directory: "react-solitaire/dist"
-
-      
