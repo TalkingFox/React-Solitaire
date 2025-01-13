@@ -41,7 +41,7 @@ jobs:
           aws-access-key-id: ${{ secrets.DEPLOYER_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.DEPLOYER_SECRET_KEY }}
           aws-region: us-east-1
-          role-to-assume: ${{ secrets.DEPLOYER_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.DEPLOYER_ROLE }}
           role-duration-seconds: 300
           role-session-name: DeploySolitaire
 
