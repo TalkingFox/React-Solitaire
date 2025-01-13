@@ -1,0 +1,55 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "react-solitaire/package-lock.json"
+
+      - name: NPM Install
+        run: npm ci
+        working-directory: "react-solitaire"
+
+      - name: NPM Build
+        run: npm run build
+        working-directory: "react-solitaire"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.DEPLOYER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.DEPLOYER_SECRET_KEY }}
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.DEPLOYER_ROLE }}
+          role-duration-seconds: 900
+          role-session-name: DeploySolitaire
+
+      - name: Upload To S3
+        env:
+          WEB_BUCKET: ${{ secrets.WEB_BUCKET }}
+          CLOUDFRONT: ${{ secrets.CLOUDFRONT }}
+        run: |
+          aws s3 sync . s3://$WEB_BUCKET --delete
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT --paths "/*"
+        working-directory: "react-solitaire/dist"
