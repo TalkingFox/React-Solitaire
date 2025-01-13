@@ -183,14 +183,26 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
 
     const columnCardRightClicked = (card: CardProps, columnIndex: number) => {
         const [canSendCard, matchingStack] = canSendCardToStack(card, cardStacks);
-        if (!canSendCard || !matchingStack) {
-            return;
-        }
 
-        // Add card to stack
-        const newStacks = cardStacks.slice(0);
-        matchingStack.push(card);
-        setCardStacks(newStacks);
+        const snapshot: FreecellStateHistory = {};
+        if (!canSendCard || !matchingStack) {
+            // Try to send to free cell
+            const freecellIndex = freeCells.findIndex((cell) => cell == null);
+            if (freecellIndex == -1) {
+                return;
+            }
+
+            const newCells = freeCells.slice(0);
+            newCells[freecellIndex] = card;
+            setFreeCells(newCells);
+            snapshot.freeCells = newCells;
+        } else {
+            // Add card to stack
+            const newStacks = cardStacks.slice(0);
+            matchingStack.push(card);
+            setCardStacks(newStacks);
+            snapshot.cardStacks = newStacks;
+        }
 
         // Remove card from column
         const newColumns = cardColumns.slice(0);
@@ -200,10 +212,8 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             newColumn[newColumn.length - 1].isFaceDown = false;
         }
         setCardColumns(newColumns);
-        updateUndoStack({
-            cardColumns: newColumns,
-            cardStacks: newStacks
-        });
+        snapshot.cardColumns = newColumns;
+        updateUndoStack(snapshot);
     };
 
     const freeCellCardRightClicked = (card: CardProps) => {
@@ -366,8 +376,8 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                 if (stack.length == 0) {
                     continue;
                 }
-                const topCard = stack[stack.length-1];
-                if (topCard.suit == card.suit && topCard.text == card.text) { 
+                const topCard = stack[stack.length - 1];
+                if (topCard.suit == card.suit && topCard.text == card.text) {
                     stack.pop();
                     break;
                 }
@@ -429,8 +439,8 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                 if (stack.length == 0) {
                     continue;
                 }
-                const topCard = stack[stack.length-1];
-                if (topCard.suit == card.suit && topCard.text == card.text) { 
+                const topCard = stack[stack.length - 1];
+                if (topCard.suit == card.suit && topCard.text == card.text) {
                     stack.pop();
                     break;
                 }
