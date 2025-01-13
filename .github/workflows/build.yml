@@ -5,9 +5,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -19,17 +19,39 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: 'react-solitaire/package-lock.json'
-    - name: NPM Install
-      run: npm ci
-      working-directory: 'react-solitaire'
-    
-    - name: NPM Build
-      run: npm run build
-      working-directory: 'react-solitaire'
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "react-solitaire/package-lock.json"
+
+      - name: NPM Install
+        run: npm ci
+        working-directory: "react-solitaire"
+
+      - name: NPM Build
+        run: npm run build
+        working-directory: "react-solitaire"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.DEPLOYER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.DEPLOYER_SECRET_KEY }}
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.DEPLOYER_ACCESS_KEY }}
+          role-duration-seconds: 300
+          role-session-name: DeploySolitaire
+
+      - name: Upload To S3
+        env:
+          WEB_BUCKET: ${{ secrets.WEB_BUCKET }}
+          CLOUDFRONT: ${{ secrets.CLOUDFRONT }}
+        run: |
+          aws s3 sync . "s3://$env:WEB_BUCKET" --delete
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT
+        working-directory: "react-solitaire/dist"
+
+      
