@@ -25,5 +25,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build
+    - name: NPM Install
+      run: npm ci
+      working-directory: 'react-solitaire'
+    
+    - name: NPM Build
+      run: npm run build
+      working-directory: 'react-solitaire'
