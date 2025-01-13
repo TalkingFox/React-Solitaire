@@ -50,6 +50,6 @@ jobs:
           WEB_BUCKET: ${{ secrets.WEB_BUCKET }}
           CLOUDFRONT: ${{ secrets.CLOUDFRONT }}
         run: |
-          aws s3 sync . $WEB_BUCKET --delete
+          aws s3 sync . s3://$WEB_BUCKET --delete
           aws cloudfront create-invalidation --distribution-id $CLOUDFRONT
         working-directory: "react-solitaire/dist"
