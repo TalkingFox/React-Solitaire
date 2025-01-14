@@ -405,6 +405,18 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
         updateUndoStack({ drawDeck: newDeck, drawPile: newPile });
     };
 
+    const loadState = (revertState: KlondikeStateHistory) => {
+        setCardColumns(
+            revertState.cardColumns!.map((col) => col.map(item => structuredClone(item)))
+        );
+        setCardStacks(
+            revertState.cardStacks!.map((stack) => stack.map(item => structuredClone(item)))
+        );
+
+        setDrawDeck(revertState.drawDeck!.map(item => structuredClone(item)));
+        setDrawPile(revertState.drawPile!.map(item => structuredClone(item)));
+    }
+
     const undoClicked = () => {
         if (undoStack.length < 2) {
             return;
@@ -417,15 +429,7 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
         }
 
         const revertState = newStack[newStack.length - 1];
-        setCardColumns(
-            revertState.cardColumns!.map((col) => col.map(item => structuredClone(item)))
-        );
-        setCardStacks(
-            revertState.cardStacks!.map((stack) => stack.map(item => structuredClone(item)))
-        );
-
-        setDrawDeck(revertState.drawDeck!.map(item => structuredClone(item)));
-        setDrawPile(revertState.drawPile!.map(item => structuredClone(item)));
+        loadState(revertState);
 
         setUndoStack(newStack);
         setShowAutoSolve(
@@ -484,6 +488,17 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
         setShowAutoSolve(false);
     };
 
+    const restartGame = () => {
+        if (undoStack.length == 0) {
+            return;
+        }
+        const newStack = [undoStack[0]];
+        loadState(newStack[0]);
+        setUndoStack(newStack);
+        setShowAutoSolve(false);
+        setShowWinBanner(false);
+    };
+
     return (
         <>
             <div className="top-row">
@@ -507,7 +522,7 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                 </div>
             </div>
-            <SidePanel ref={sidepanelRef} activeVariant={Variant.Klondike} newGameClicked={startNewGame} undoClicked={undoClicked} showAutoSolve={showAutoSolve} autoSolveClicked={autoSolveClicked} variantSelected={onVariantChanged}></SidePanel>
+            <SidePanel ref={sidepanelRef} activeVariant={Variant.Klondike} newGameClicked={startNewGame} undoClicked={undoClicked} showAutoSolve={showAutoSolve} autoSolveClicked={autoSolveClicked} variantSelected={onVariantChanged} restartClicked={restartGame}></SidePanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
     )
