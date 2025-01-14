@@ -9,7 +9,8 @@ export interface SidePanelProps {
     newGameClicked: () => void,
     undoClicked: () => void,
     autoSolveClicked: () => void,
-    variantSelected: (variant: Variant) => void
+    variantSelected: (variant: Variant) => void,
+    restartClicked: () => void
 }
 
 export interface SidePanelHandles {
@@ -17,7 +18,7 @@ export interface SidePanelHandles {
     resetTimer: () => void,
 }
 
-const SidePanel = forwardRef(function SidePanel({ showAutoSolve, activeVariant, newGameClicked, undoClicked, autoSolveClicked, variantSelected }: SidePanelProps, ref: ForwardedRef<unknown>) {
+const SidePanel = forwardRef(function SidePanel({ showAutoSolve, activeVariant, newGameClicked, undoClicked, autoSolveClicked, variantSelected, restartClicked }: SidePanelProps, ref: ForwardedRef<unknown>) {
     const stopwatchRef = useRef<StopwatchHandle>(null);
 
     useImperativeHandle(ref, () => {
@@ -48,6 +49,7 @@ const SidePanel = forwardRef(function SidePanel({ showAutoSolve, activeVariant, 
                     </div>
                     <button onClick={newGameClicked} className='panel-button'>New Game</button>
                     <button onClick={undoClicked} className='panel-button'>Undo Move</button>
+                    <button onClick={restartClicked} className='panel-button'>Restart Game</button>
                 </div>
                 <div className='special-column'>
                     {showAutoSolve ? <button onClick={autoSolveClicked} className='panel-button glow-button'>Auto-Solve</button> : undefined}

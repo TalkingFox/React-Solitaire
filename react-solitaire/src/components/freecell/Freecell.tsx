@@ -454,6 +454,18 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         updateUndoStack(snapshot);
     }
 
+    const loadState = (revertState: FreecellStateHistory) => {
+        setCardColumns(
+            revertState.cardColumns!.map((col) => col.map(item => structuredClone(item)))
+        );
+        setCardStacks(
+            revertState.cardStacks!.map((stack) => stack.map(item => structuredClone(item)))
+        );
+        setFreeCells(
+            revertState.freeCells!.map((cell) => structuredClone(cell))
+        );
+    }
+
     const undoClicked = () => {
         if (undoStack.length < 2) {
             return;
@@ -466,15 +478,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         }
 
         const revertState = newStack[newStack.length - 1];
-        setCardColumns(
-            revertState.cardColumns!.map((col) => col.map(item => structuredClone(item)))
-        );
-        setCardStacks(
-            revertState.cardStacks!.map((stack) => stack.map(item => structuredClone(item)))
-        );
-        setFreeCells(
-            revertState.freeCells!.map((cell) => structuredClone(cell))
-        );
+        loadState(revertState);
 
         setUndoStack(newStack);
         setShowAutoSolve(
@@ -559,6 +563,17 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
         setShowAutoSolve(false);
     };
 
+    const restartGame = () => {
+        if (undoStack.length == 0) {
+            return;
+        }
+        const newStack = [undoStack[0]];
+        loadState(newStack[0]);
+        setUndoStack(newStack);
+        setShowAutoSolve(false);
+        setShowWinBanner(false);
+    };
+
     return (
         <>
             <div className="top-row">
@@ -587,7 +602,7 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
                     <CardColumn cards={cardColumns[6]} cardRightClicked={(card) => columnCardRightClicked(card, 6)} onCardDropped={(card) => onColumnCardDrop(card, 6)}></CardColumn>
                     <CardColumn cards={cardColumns[7]} cardRightClicked={(card) => columnCardRightClicked(card, 7)} onCardDropped={(card) => onColumnCardDrop(card, 7)}></CardColumn>
                 </div>
-            </div><SidePanel ref={sidepanelRef} activeVariant={Variant.Freecell} newGameClicked={startNewGame} undoClicked={undoClicked} showAutoSolve={showAutoSolve} autoSolveClicked={autoSolveClicked} variantSelected={onVariantChanged}></SidePanel>
+            </div><SidePanel ref={sidepanelRef} activeVariant={Variant.Freecell} newGameClicked={startNewGame} undoClicked={undoClicked} showAutoSolve={showAutoSolve} autoSolveClicked={autoSolveClicked} variantSelected={onVariantChanged} restartClicked={restartGame}></SidePanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </>
 
