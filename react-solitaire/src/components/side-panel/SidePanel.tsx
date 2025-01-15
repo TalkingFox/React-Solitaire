@@ -48,8 +48,8 @@ const SidePanel = forwardRef(function SidePanel({ showAutoSolve, activeVariant, 
                         </select>
                     </div>
                     <button onClick={newGameClicked} className='panel-button'>New Game</button>
-                    <button onClick={undoClicked} className='panel-button'>Undo Move</button>
                     <button onClick={restartClicked} className='panel-button'>Restart Game</button>
+                    <button onClick={undoClicked} className='panel-button'>Undo Move</button>
                 </div>
                 <div className='special-column'>
                     {showAutoSolve ? <button onClick={autoSolveClicked} className='panel-button glow-button'>Auto-Solve</button> : undefined}
