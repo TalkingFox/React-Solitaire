@@ -11,6 +11,7 @@ import WinBanner from '../win-banner/WinBanner.tsx';
 import { SolitaireProps } from '../../shared/solitaire-props.ts';
 import { Variant } from '../../shared/variants.ts';
 import { DeckBuilder } from '../../shared/deck-builder.ts';
+import { KeyModifier, useKeyPress } from '../../hooks/useKeyPress.ts';
 
 function buildColumns(startingDeck: CardProps[]) {
     let columns: CardProps[][] = [[], [], [], [], [], [], []]
@@ -436,6 +437,8 @@ function Klondike({ onVariantChanged }: SolitaireProps) {
             canAutoSolve(revertState)
         );
     }
+
+    useKeyPress({ keys: [{ modifier: KeyModifier.Control, key: 'z' }], callback: undoClicked });
 
     const solveNextCard = () => {
         if (solveIntervalRef.current) {

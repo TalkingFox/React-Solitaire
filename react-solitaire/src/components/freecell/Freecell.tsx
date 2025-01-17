@@ -11,6 +11,7 @@ import { DeckBuilder } from '../../shared/deck-builder';
 import { CARD_VALUE_BY_TEXT, CARD_TEXT_BY_VALUE, doSuitsAlternate } from '../../shared/card-values';
 import { CardSuit } from '../../shared/enums';
 import FreeStack from '../free-stack/FreeStack';
+import { KeyModifier, useKeyPress } from '../../hooks/useKeyPress';
 
 function buildColumns(startingDeck: CardProps[]) {
     let columns: CardProps[][] = [[], [], [], [], [], [], [], []]
@@ -485,6 +486,8 @@ function Freecell({ onVariantChanged }: SolitaireProps) {
             canAutoSolve(revertState)
         );
     }
+
+    useKeyPress({ keys: [{ modifier: KeyModifier.Control, key: 'z' }], callback: undoClicked });
 
     const solveNextCard = () => {
         if (solveIntervalRef.current) {
