@@ -1,5 +1,5 @@
 import './Osmosis.css';
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import CardRow from "../card-row/CardRow";
 import DeckStack from "../deck-stack/DeckStack";
 import { CardProps, CardSource } from "../playing-card/PlayingCard";
@@ -52,6 +52,17 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
     const [showWinBanner, setShowWinBanner] = useState<boolean>(false);
 
     const sidepanelRef = useRef<SidePanelHandles>(null);
+
+    useEffect(() => {
+        const isGameWon = cardStacks.every((cardStack) => cardStack.length == 13);
+
+        if (!isGameWon) {
+            return;
+        }
+
+        setShowWinBanner(true);
+        sidepanelRef.current?.setTimerPaused(true);
+    });
 
     const startNewGame = () => {
         const newDeck = DeckBuilder.BuildDeck();
