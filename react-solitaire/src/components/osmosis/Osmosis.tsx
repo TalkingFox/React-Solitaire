@@ -8,6 +8,7 @@ import { Variant } from "../../shared/variants";
 import SidePanel, { SidePanelHandles } from "../side-panel/SidePanel";
 import { CARD_VALUE_BY_TEXT } from '../../shared/card-values';
 import { SolitaireProps } from '../../shared/solitaire-props';
+import WinBanner from '../win-banner/WinBanner';
 
 interface OsmosisStateHistory {
     drawDeck?: CardProps[],
@@ -255,6 +256,11 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
         setUndoStack(newStack);
     };
 
+    const onHideWinBanner = () => {
+        sidepanelRef.current?.setTimerPaused(true);
+        setShowWinBanner(false);
+    };
+
     return (
         <div className='osmosis-parent osmosis-row'>
             <div className="osmosis-column osmosis-reserve-column">
@@ -284,6 +290,7 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
                 autoSolveClicked={console.log}
                 variantSelected={onVariantChanged}
                 restartClicked={restartGame}></SidePanel>
+            {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </div>
     )
 }
