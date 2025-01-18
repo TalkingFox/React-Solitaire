@@ -7,6 +7,7 @@ import { DeckBuilder } from "../../shared/deck-builder";
 import { Variant } from "../../shared/variants";
 import SidePanel, { SidePanelHandles } from "../side-panel/SidePanel";
 import { CARD_VALUE_BY_TEXT } from '../../shared/card-values';
+import { SolitaireProps } from '../../shared/solitaire-props';
 
 interface OsmosisStateHistory {
     drawDeck?: CardProps[],
@@ -33,7 +34,7 @@ function buildReserves(startingDeck: CardProps[]): CardProps[][] {
     return reserves;
 }
 
-const Osmosis = () => {
+const Osmosis = ({onVariantChanged}: SolitaireProps) => {
     const startingDeck = useMemo(DeckBuilder.BuildDeck, []);
     const startingReserves = useMemo<CardProps[][]>(() => buildReserves(startingDeck), []);
     const startingCard = startingDeck.pop() as CardProps;
@@ -50,6 +51,23 @@ const Osmosis = () => {
     }]);
 
     const sidepanelRef = useRef<SidePanelHandles>(null);
+
+    const startNewGame = () => {
+        const newDeck = DeckBuilder.BuildDeck();
+        const newReservces = buildReserves(newDeck);
+
+        const startingCard = newDeck.pop() as CardProps;
+        setCardStacks([[startingCard], [], [], []]);
+        
+        setReserves(newReservces);
+        setDrawDeck(newDeck);
+        setDrawPile([]);
+
+        // undostack
+
+        sidepanelRef.current?.setTimerPaused(false);
+        sidepanelRef.current?.resetTimer();
+    };
 
     const drawCardsClicked = () => {
         let newDeck: CardProps[];
@@ -184,7 +202,14 @@ const Osmosis = () => {
                     cardRightClicked={trySendCardToStacks}
                     drawCardsClicked={drawCardsClicked}></DeckStack>
             </div>
-            <SidePanel ref={sidepanelRef} activeVariant={Variant.Osmosis} newGameClicked={console.log} undoClicked={console.log} showAutoSolve={false} autoSolveClicked={console.log} variantSelected={console.log} restartClicked={console.log}></SidePanel>
+            <SidePanel ref={sidepanelRef}
+                activeVariant={Variant.Osmosis}
+                newGameClicked={startNewGame}
+                undoClicked={console.log}
+                showAutoSolve={false}
+                autoSolveClicked={console.log}
+                variantSelected={onVariantChanged}
+                restartClicked={console.log}></SidePanel>
         </div>
     )
 }
