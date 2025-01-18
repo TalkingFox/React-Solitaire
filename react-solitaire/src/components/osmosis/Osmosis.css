@@ -1,11 +1,25 @@
 .osmosis-row {
     display: flex;
     flex-direction: row;
-    gap: 5rem;
+    flex-wrap: wrap;
+    width: 100%;
 }
 
-.osmosis-parent {
+.osmosis-column {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    width: 5rem;
+}
+
+.osmosis-reserve-column {
+    flex: 0.25;
+}
+
+.osmosis-stack-column {
+    flex: 0.5;
+}
+
+.osmosis-deck-column {
+    flex: 1;
 }
