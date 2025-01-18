@@ -78,6 +78,17 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
         setShowWinBanner(false);
     };
 
+    const restartGame = () => {
+        if (undoStack.length == 0) {
+            return;
+        }
+
+        const newStack = [undoStack[0]];
+        loadState(newStack[0]);
+        setUndoStack(newStack);
+        setShowWinBanner(false);
+    };
+
     const updateUndoStack = (sourceData: OsmosisStateHistory, clearStack: boolean = false) => {
         const snapshot: OsmosisStateHistory = {
             cardStacks: (sourceData.cardStacks ?? cardStacks).map(stack => stack.map(card => structuredClone(card))),
@@ -261,7 +272,7 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
                 showAutoSolve={false}
                 autoSolveClicked={console.log}
                 variantSelected={onVariantChanged}
-                restartClicked={console.log}></SidePanel>
+                restartClicked={restartGame}></SidePanel>
         </div>
     )
 }
