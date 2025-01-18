@@ -27,7 +27,7 @@ function App() {
             cardGameElement = <Freecell onVariantChanged={changeVariant}></Freecell>
             break;
         case Variant.Osmosis:
-            cardGameElement = <Osmosis></Osmosis>
+            cardGameElement = <Osmosis onVariantChanged={changeVariant}></Osmosis>
             break;
     }
 

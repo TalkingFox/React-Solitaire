@@ -34,7 +34,7 @@ function buildReserves(startingDeck: CardProps[]): CardProps[][] {
     return reserves;
 }
 
-const Osmosis = ({onVariantChanged}: SolitaireProps) => {
+const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
     const startingDeck = useMemo(DeckBuilder.BuildDeck, []);
     const startingReserves = useMemo<CardProps[][]>(() => buildReserves(startingDeck), []);
     const startingCard = startingDeck.pop() as CardProps;
@@ -49,6 +49,7 @@ const Osmosis = ({onVariantChanged}: SolitaireProps) => {
         drawDeck: drawDeck.map((card) => structuredClone(card)),
         drawPile: []
     }]);
+    const [showWinBanner, setShowWinBanner] = useState<boolean>(false);
 
     const sidepanelRef = useRef<SidePanelHandles>(null);
 
@@ -57,16 +58,37 @@ const Osmosis = ({onVariantChanged}: SolitaireProps) => {
         const newReservces = buildReserves(newDeck);
 
         const startingCard = newDeck.pop() as CardProps;
-        setCardStacks([[startingCard], [], [], []]);
-        
+        const newStacks = [[startingCard], [], [], []];
+        setCardStacks(newStacks);
+
         setReserves(newReservces);
         setDrawDeck(newDeck);
         setDrawPile([]);
 
-        // undostack
+        updateUndoStack({
+            cardStacks: newStacks,
+            drawDeck: newDeck,
+            drawPile: [],
+            reserves: newReservces
+        }, true);
 
         sidepanelRef.current?.setTimerPaused(false);
         sidepanelRef.current?.resetTimer();
+
+        setShowWinBanner(false);
+    };
+
+    const updateUndoStack = (sourceData: OsmosisStateHistory, clearStack: boolean = false) => {
+        const snapshot: OsmosisStateHistory = {
+            cardStacks: (sourceData.cardStacks ?? cardStacks).map(stack => stack.map(card => structuredClone(card))),
+            drawDeck: (sourceData.drawDeck ?? drawDeck).map(card => structuredClone(card)),
+            drawPile: (sourceData.drawPile ?? drawPile).map(card => structuredClone(card)),
+            reserves: (sourceData.reserves ?? reserves).map(reserve => reserve.map(card => structuredClone(card)))
+        };
+
+        const newStack = clearStack ? [] : undoStack.slice(0);
+        newStack.push(snapshot);
+        setUndoStack(newStack);
     };
 
     const drawCardsClicked = () => {
@@ -90,7 +112,7 @@ const Osmosis = ({onVariantChanged}: SolitaireProps) => {
 
         setDrawDeck(newDeck);
         setDrawPile(newPile);
-        //updateundo
+        updateUndoStack({ drawDeck: newDeck, drawPile: newPile });
     };
 
     const canAddCardToStack = (card: CardProps, stackIndex: number): boolean => {
@@ -128,11 +150,14 @@ const Osmosis = ({onVariantChanged}: SolitaireProps) => {
     };
 
     const addCardToStack = (card: CardProps, stackIndex: number) => {
+        const snapshot: OsmosisStateHistory = {};
+
         // Remove card from source
         if (card.source == CardSource.DrawPile) {
             const newPile = drawPile.slice(0)
                 .filter((pileCard) => pileCard.suit != card.suit || pileCard.text != card.text);
             setDrawPile(newPile);
+            snapshot.drawPile = newPile;
         }
         else if (card.source == CardSource.Reserve) {
             const newReserves = reserves.slice(0);
@@ -152,6 +177,7 @@ const Osmosis = ({onVariantChanged}: SolitaireProps) => {
                 }
             }
             setReserves(newReserves);
+            snapshot.reserves = newReserves;
         }
 
         // Add card to stack
@@ -161,6 +187,8 @@ const Osmosis = ({onVariantChanged}: SolitaireProps) => {
         newStack.push(card);
         newStack.sort((a, b) => CARD_VALUE_BY_TEXT[a.text] - CARD_VALUE_BY_TEXT[b.text]);
         setCardStacks(newStacks);
+        snapshot.cardStacks = newStacks;
+        updateUndoStack(snapshot);
     };
 
     const tryAddCardToStack = (card: CardProps, stackIndex: number) => {
@@ -179,6 +207,30 @@ const Osmosis = ({onVariantChanged}: SolitaireProps) => {
                 return;
             }
         }
+    };
+
+    const loadState = (revertState: OsmosisStateHistory) => {
+        setCardStacks(revertState.cardStacks!.map((stack => stack.map(card => structuredClone(card)))));
+        setDrawDeck(revertState.drawDeck!.map(card => structuredClone(card)));
+        setDrawPile(revertState.drawPile!.map(card => structuredClone(card)));
+        setReserves(revertState.reserves!.map((reserve) => reserve.map(card => structuredClone(card))));
+    };
+
+    const undoLastMove = () => {
+        if (undoStack.length < 2) {
+            return;
+        }
+
+        const newStack = undoStack.slice(0);
+        newStack.pop();
+        if (newStack.length == 0) {
+            return;
+        }
+
+        const revertState = newStack[newStack.length - 1];
+        loadState(revertState);
+
+        setUndoStack(newStack);
     };
 
     return (
@@ -205,7 +257,7 @@ const Osmosis = ({onVariantChanged}: SolitaireProps) => {
             <SidePanel ref={sidepanelRef}
                 activeVariant={Variant.Osmosis}
                 newGameClicked={startNewGame}
-                undoClicked={console.log}
+                undoClicked={undoLastMove}
                 showAutoSolve={false}
                 autoSolveClicked={console.log}
                 variantSelected={onVariantChanged}
