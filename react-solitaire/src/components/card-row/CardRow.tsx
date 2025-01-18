@@ -2,10 +2,11 @@ import PlayingCard, { CardProps, CardSource } from '../playing-card/PlayingCard'
 import './CardRow.css';
 
 export interface CardRowProps {
-    cards: CardProps[]
+    cards: CardProps[],
+    allVisible?: boolean
 }
 
-const CardRow = ({ cards }: CardRowProps) => {
+const CardRow = ({ cards, allVisible = true }: CardRowProps) => {
     const renderElements: JSX.Element[] = [];
 
     const emptyRow = (
@@ -33,7 +34,7 @@ const CardRow = ({ cards }: CardRowProps) => {
                     suit={card.suit}
                     text={card.text}
                     isDraggable={!card.isFaceDown}
-                    isFaceDown={false}
+                    isFaceDown={allVisible ? false : index != cards.length-1}
                     zIndex={index}
                 ></PlayingCard>
             </div>)

@@ -54,21 +54,21 @@ const Osmosis = () => {
     return (
         <div className='osmosis-parent'>
             <div className="osmosis-row">
-                <CardRow cards={reserves[0]}></CardRow>
+                <CardRow allVisible={false} cards={reserves[0]}></CardRow>
                 <CardRow cards={cardStacks[0]}></CardRow>
                 <div className='osmosis-spacer'></div>
                 <DeckStack deck={drawDeck} playedCards={drawPile} cardRightClicked={console.log} drawCardsClicked={console.log}></DeckStack>
             </div>
             <div className="osmosis-row">
-                <CardRow cards={reserves[1]}></CardRow>
+                <CardRow allVisible={false} cards={reserves[1]}></CardRow>
                 <CardRow cards={cardStacks[1]}></CardRow>
             </div>
             <div className="osmosis-row">
-                <CardRow cards={reserves[2]}></CardRow>
+                <CardRow allVisible={false} cards={reserves[2]}></CardRow>
                 <CardRow cards={cardStacks[2]}></CardRow>
             </div>
             <div className="osmosis-row">
-                <CardRow cards={reserves[3]}></CardRow>
+                <CardRow allVisible={false} cards={reserves[3]}></CardRow>
                 <CardRow cards={cardStacks[3]}></CardRow>
             </div>
             <SidePanel ref={sidepanelRef} activeVariant={Variant.Osmosis} newGameClicked={console.log} undoClicked={console.log} showAutoSolve={false} autoSolveClicked={console.log} variantSelected={console.log} restartClicked={console.log}></SidePanel>
