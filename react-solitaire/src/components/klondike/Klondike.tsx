@@ -13,7 +13,7 @@ import { Variant } from '../../shared/variants.ts';
 import { DeckBuilder } from '../../shared/deck-builder.ts';
 import { KeyModifier, useKeyPress } from '../../hooks/useKeyPress.ts';
 
-function buildColumns(startingDeck: CardProps[]) {
+function buildColumns(startingDeck: CardProps[]): CardProps[][] {
     let columns: CardProps[][] = [[], [], [], [], [], [], []]
     for (let i = 0; i < columns.length; i++) {
         for (let j = 0; j + i < columns.length; j++) {

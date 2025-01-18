@@ -12,7 +12,8 @@ export enum CardSource {
     CardColumn,
     DrawPile,
     CardStack,
-    FreeStack
+    FreeStack,
+    Reserve
 }
 
 export interface CardProps {
