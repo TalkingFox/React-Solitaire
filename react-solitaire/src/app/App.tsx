@@ -3,6 +3,7 @@ import Klondike from '../components/klondike/Klondike.tsx';
 import { useEffect, useState } from 'react';
 import { Variant } from '../shared/variants.ts';
 import Freecell from '../components/freecell/Freecell.tsx';
+import Osmosis from '../components/osmosis/Osmosis.tsx';
 
 function App() {
     useEffect(() => {
@@ -24,6 +25,9 @@ function App() {
             break;
         case Variant.Freecell:
             cardGameElement = <Freecell onVariantChanged={changeVariant}></Freecell>
+            break;
+        case Variant.Osmosis:
+            cardGameElement = <Osmosis></Osmosis>
             break;
     }
 
