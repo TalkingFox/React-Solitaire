@@ -75,12 +75,12 @@ const Osmosis = () => {
         //updateundo
     };
 
-    const tryAddCardToStack = (card: CardProps, stackIndex: number) => {
+    const canAddCardToStack = (card: CardProps, stackIndex: number): boolean => {
         // Can add any cards to the first stack so long as the suits match.
         if (stackIndex == 0) {
             const compareCard = cardStacks[0][0];
             if (compareCard.suit != card.suit) {
-                return;
+                return false;
             }
         }
         // Otherwise, the dropped card must match the defined suit for the row
@@ -89,17 +89,27 @@ const Osmosis = () => {
             const stack = cardStacks[stackIndex];
             // Early exit if suits don't match
             if (stack.length > 0 && stack[0].suit != card.suit) {
-                return;
+                return false;
+            }
+
+            // Check if this card belongs in one of its parent's rows
+            for (let i = 0; i < stackIndex; i++) {
+                if (cardStacks[i].length == 0 || cardStacks[i][0].suit == card.suit) {
+                    return false;
+                }
             }
 
             // Otherwise check that the dropped card's face has been placed in the parent card already.
             const parentStack = cardStacks[stackIndex - 1];
             const isCardInParent = parentStack.some((parentCard) => parentCard.text == card.text);
             if (!isCardInParent) {
-                return;
+                return false;
             }
         }
+        return true;
+    };
 
+    const addCardToStack = (card: CardProps, stackIndex: number) => {
         // Remove card from source
         if (card.source == CardSource.DrawPile) {
             const newPile = drawPile.slice(0)
@@ -135,25 +145,43 @@ const Osmosis = () => {
         setCardStacks(newStacks);
     };
 
+    const tryAddCardToStack = (card: CardProps, stackIndex: number) => {
+        const canAdd = canAddCardToStack(card, stackIndex);
+        if (!canAdd) {
+            return;
+        }
+
+        addCardToStack(card, stackIndex);
+    };
+
+    const trySendCardToStacks = (card: CardProps) => {
+        for (let i = 0; i < cardStacks.length; i++) {
+            if (canAddCardToStack(card, i)) {
+                addCardToStack(card, i);
+                return;
+            }
+        }
+    };
+
     return (
         <div className='osmosis-parent osmosis-row'>
             <div className="osmosis-column osmosis-reserve-column">
-                <CardRow allVisible={false} cards={reserves[0]}></CardRow>
-                <CardRow allVisible={false} cards={reserves[1]}></CardRow>
-                <CardRow allVisible={false} cards={reserves[2]}></CardRow>
-                <CardRow allVisible={false} cards={reserves[3]}></CardRow>
+                <CardRow allVisible={false} cards={reserves[0]} onCardRightClicked={trySendCardToStacks}></CardRow>
+                <CardRow allVisible={false} cards={reserves[1]} onCardRightClicked={trySendCardToStacks}></CardRow>
+                <CardRow allVisible={false} cards={reserves[2]} onCardRightClicked={trySendCardToStacks}></CardRow>
+                <CardRow allVisible={false} cards={reserves[3]} onCardRightClicked={trySendCardToStacks}></CardRow>
             </div>
             <div className='osmosis-column osmosis-stack-column'>
-                <CardRow cards={cardStacks[0]} onCardDropped={(card) => tryAddCardToStack(card, 0)}></CardRow>
-                <CardRow cards={cardStacks[1]} onCardDropped={(card) => tryAddCardToStack(card, 1)}></CardRow>
-                <CardRow cards={cardStacks[2]} onCardDropped={(card) => tryAddCardToStack(card, 2)}></CardRow>
-                <CardRow cards={cardStacks[3]} onCardDropped={(card) => tryAddCardToStack(card, 3)}></CardRow>
+                <CardRow allowDragging={false} cards={cardStacks[0]} onCardDropped={(card) => tryAddCardToStack(card, 0)}></CardRow>
+                <CardRow allowDragging={false} cards={cardStacks[1]} onCardDropped={(card) => tryAddCardToStack(card, 1)}></CardRow>
+                <CardRow allowDragging={false} cards={cardStacks[2]} onCardDropped={(card) => tryAddCardToStack(card, 2)}></CardRow>
+                <CardRow allowDragging={false} cards={cardStacks[3]} onCardDropped={(card) => tryAddCardToStack(card, 3)}></CardRow>
             </div>
             <div className='osmosis-column osmosis-deck-column'>
                 <DeckStack
                     deck={drawDeck}
                     playedCards={drawPile}
-                    cardRightClicked={console.log}
+                    cardRightClicked={trySendCardToStacks}
                     drawCardsClicked={drawCardsClicked}></DeckStack>
             </div>
             <SidePanel ref={sidepanelRef} activeVariant={Variant.Osmosis} newGameClicked={console.log} undoClicked={console.log} showAutoSolve={false} autoSolveClicked={console.log} variantSelected={console.log} restartClicked={console.log}></SidePanel>

@@ -7,10 +7,12 @@ import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element
 export interface CardRowProps {
     cards: CardProps[],
     allVisible?: boolean,
-    onCardDropped?: (card: CardProps) => void
+    allowDragging?: boolean,
+    onCardDropped?: (card: CardProps) => void,
+    onCardRightClicked?: (card: CardProps) => void
 }
 
-const CardRow = ({ cards, allVisible = true, onCardDropped }: CardRowProps) => {
+const CardRow = ({ cards, allVisible = true, allowDragging = true, onCardDropped, onCardRightClicked }: CardRowProps) => {
     const ref = useRef(null);
 
     useEffect(() => {
@@ -51,6 +53,7 @@ const CardRow = ({ cards, allVisible = true, onCardDropped }: CardRowProps) => {
     renderElements.push(emptyRow);
 
     cards.forEach((card, index) => {
+        const isCardFaceDown = allVisible ? false : index != cards.length - 1;
         const cardElement = (
             <div className='card-row-card'
                 style={{ marginLeft: `${1.5 * index}rem` }}
@@ -60,9 +63,10 @@ const CardRow = ({ cards, allVisible = true, onCardDropped }: CardRowProps) => {
                     source={CardSource.Reserve}
                     suit={card.suit}
                     text={card.text}
-                    isDraggable={!card.isFaceDown}
-                    isFaceDown={allVisible ? false : index != cards.length - 1}
+                    isDraggable={allowDragging ? !isCardFaceDown : false}
+                    isFaceDown={isCardFaceDown}
                     zIndex={index}
+                    onRightClick={isCardFaceDown ? undefined : onCardRightClicked}
                 ></PlayingCard>
             </div>)
         renderElements.push(cardElement);
