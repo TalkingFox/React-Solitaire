@@ -50,6 +50,29 @@ const Osmosis = () => {
 
     const sidepanelRef = useRef<SidePanelHandles>(null);
 
+    const drawCardsClicked = () => {
+        let newDeck: CardProps[];
+        let newPile: CardProps[];
+        if (drawDeck.length == 0) {
+            newDeck = drawPile.slice(0).reverse();
+            newPile = [];
+        }
+        else {
+            newDeck = drawDeck.slice(0);
+            newPile = drawPile.slice();
+        }
+
+        const poppedCards = [
+            newDeck.pop(),
+            newDeck.pop(),
+            newDeck.pop()
+        ].filter(x => x !== null && x !== undefined);
+        newPile.push(...poppedCards);
+
+        setDrawDeck(newDeck);
+        setDrawPile(newPile);
+        //updateundo
+    };
 
     return (
         <div className='osmosis-parent'>
@@ -57,7 +80,11 @@ const Osmosis = () => {
                 <CardRow allVisible={false} cards={reserves[0]}></CardRow>
                 <CardRow cards={cardStacks[0]}></CardRow>
                 <div className='osmosis-spacer'></div>
-                <DeckStack deck={drawDeck} playedCards={drawPile} cardRightClicked={console.log} drawCardsClicked={console.log}></DeckStack>
+                <DeckStack
+                    deck={drawDeck}
+                    playedCards={drawPile}
+                    cardRightClicked={console.log}
+                    drawCardsClicked={drawCardsClicked}></DeckStack>
             </div>
             <div className="osmosis-row">
                 <CardRow allVisible={false} cards={reserves[1]}></CardRow>
