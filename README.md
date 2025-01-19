@@ -5,6 +5,7 @@ A fun project to stretch my legs with React; a working game of solitaire. Uses [
 Support for:
 - Klondike
 - Freecell
+- Osmosis
 
 Play it [Here!](https://solitaire.wyleconsesone.com/)
 
