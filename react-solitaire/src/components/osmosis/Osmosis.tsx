@@ -18,7 +18,6 @@ interface OsmosisStateHistory {
 }
 
 function buildReserves(startingDeck: CardProps[]): CardProps[][] {
-    console.log(startingDeck.length)
     const reserves: CardProps[][] = [[], [], [], []];
     for (let i = 0; i < reserves.length; i++) {
         const reserve = reserves[i];
