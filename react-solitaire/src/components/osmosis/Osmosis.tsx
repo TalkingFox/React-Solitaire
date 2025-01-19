@@ -9,6 +9,7 @@ import SidePanel, { SidePanelHandles } from "../side-panel/SidePanel";
 import { CARD_VALUE_BY_TEXT } from '../../shared/card-values';
 import { SolitaireProps } from '../../shared/solitaire-props';
 import WinBanner from '../win-banner/WinBanner';
+import { KeyModifier, useKeyPress } from '../../hooks/useKeyPress';
 
 interface OsmosisStateHistory {
     drawDeck?: CardProps[],
@@ -259,6 +260,8 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
         sidepanelRef.current?.setTimerPaused(true);
         setShowWinBanner(false);
     };
+
+    useKeyPress({ keys: [{ modifier: KeyModifier.Control, key: 'z' }], callback: undoLastMove });
 
     return (
         <div className='osmosis-parent osmosis-row'>

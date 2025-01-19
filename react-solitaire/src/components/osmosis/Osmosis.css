@@ -13,13 +13,13 @@
 }
 
 .osmosis-reserve-column {
-    flex: 0.25;
+    flex: 0.75;
 }
 
 .osmosis-stack-column {
-    flex: 0.5;
+    flex: 1.5;
 }
 
 .osmosis-deck-column {
-    flex: 1;
+    flex: 2;
 }
