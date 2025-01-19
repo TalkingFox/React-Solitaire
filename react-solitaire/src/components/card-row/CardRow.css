@@ -1,0 +1,14 @@
+.card-row {
+    display: grid;
+}
+
+.card-row-card {
+    grid-row: 1;
+    grid-column: 1;
+    background-color: transparent !important;
+}
+
+.card-row-card>.empty-stack {
+    width: 100%;
+    height: 100%;
+}
