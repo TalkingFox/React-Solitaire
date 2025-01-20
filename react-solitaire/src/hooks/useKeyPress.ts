@@ -6,7 +6,7 @@ export enum KeyModifier {
 
 export interface KeyCombo {
     key: string,
-    modifier: KeyModifier
+    modifier?: KeyModifier
 }
 
 export interface UseKeyPressProps {

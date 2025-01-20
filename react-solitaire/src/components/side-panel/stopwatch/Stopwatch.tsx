@@ -7,7 +7,7 @@ export interface StopwatchHandle {
     reset: () => void
 }
 
-const Stopwatch = forwardRef(function Stopwatch({ },ref: ForwardedRef<unknown>) {
+const Stopwatch = forwardRef(function Stopwatch({ }, ref: ForwardedRef<unknown>) {
     const [startTime, setStartTime] = useState(Date.now());
     const [now, setNow] = useState(Date.now());
     const [isRunning, setRunning] = useState(true);
@@ -19,6 +19,12 @@ const Stopwatch = forwardRef(function Stopwatch({ },ref: ForwardedRef<unknown>) 
                 setRunning(!isPaused);
                 if (intervalRef.current) {
                     clearInterval(intervalRef.current);
+                }
+                if (!isPaused) {
+                    const currentSpan = now - startTime;
+                    const newNow = Date.now();
+                    setStartTime(newNow - currentSpan);
+                    setNow(newNow);
                 }
             },
             reset() {
