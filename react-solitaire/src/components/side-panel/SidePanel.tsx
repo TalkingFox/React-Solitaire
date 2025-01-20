@@ -50,7 +50,7 @@ const SidePanel = forwardRef(function SidePanel({ showAutoSolve, activeVariant, 
         stopwatchRef.current?.setPaused(false);
     };
 
-    useKeyPress({ keys: [{ key: ' ' }], callback: (_) => pauseGame() });
+    useKeyPress({ keys: [{ key: ' ' }], callback: (_) => gamePaused ? unpauseGame() : pauseGame() });
 
     return (
         <div id='side-panel'>
