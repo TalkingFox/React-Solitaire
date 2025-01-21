@@ -63,7 +63,7 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
 
         setShowWinBanner(true);
         sidepanelRef.current?.setTimerPaused(true);
-    });
+    },[cardStacks]);
 
     const startNewGame = () => {
         const newDeck = DeckBuilder.BuildDeck();
