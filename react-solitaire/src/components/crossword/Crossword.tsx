@@ -44,7 +44,7 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
     const startingCourt = useMemo(buildCourt, []);
     const sidepanelRef = useRef(null);
     const startingCard = startingDeck.pop() as CardProps;
-    
+
     const [court, setCourt] = useState<CardProps[]>(startingCourt);
     const [drawDeck, setDrawDeck] = useState<CardProps[]>(startingDeck);
     const [drawPile, setDrawPile] = useState<CardProps[]>([startingCard]);
@@ -54,73 +54,73 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
             <div className='crossword-column crossword-reserve'>
                 <DeckStack cardRightClicked={console.log}
                     deck={drawDeck}
-                    drawCardsClicked={() => {}}
+                    drawCardsClicked={() => { }}
                     playedCards={drawPile}
                     cardSize={CardSize.Small}></DeckStack>
             </div>
             <div className='crossword-column'></div>
             <div className='crossword-column'>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
             </div>
             <div className='crossword-column'>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
             </div>
             <div className='crossword-column'>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
             </div>
             <div className='crossword-column'>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
             </div>
             <div className='crossword-column'>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
             </div>
             <div className='crossword-column'>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
             </div>
             <div className='crossword-column'>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
-                <CardStack cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
+                <CardStack cardSize={CardSize.Small} cards={[]} isDraggable={false} onCardDropped={console.log}></CardStack>
             </div>
             <SidePanel ref={sidepanelRef}
                 activeVariant={Variant.Crossword}

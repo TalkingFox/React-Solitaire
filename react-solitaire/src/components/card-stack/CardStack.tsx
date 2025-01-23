@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import PlayingCard, { CardProps, CardSource } from '../playing-card/PlayingCard';
+import PlayingCard, { CardProps, CardSize, CardSource } from '../playing-card/PlayingCard';
 import './CardStack.css'
 import invariant from 'tiny-invariant';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
@@ -7,10 +7,11 @@ import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element
 export interface CardStackProps {
     cards: CardProps[],
     isDraggable: boolean,
+    cardSize?: CardSize,
     onCardDropped: (card: CardProps) => void
 }
 
-function CardStack({ cards, isDraggable, onCardDropped }: CardStackProps) {
+function CardStack({ cards, isDraggable, cardSize = CardSize.Standard, onCardDropped }: CardStackProps) {
     const ref = useRef(null);
     useEffect(() => {
         const el = ref.current;
@@ -42,14 +43,16 @@ function CardStack({ cards, isDraggable, onCardDropped }: CardStackProps) {
     }
     if (cards.length > 0) {
         const topCard = cards[cards.length - 1];
-        displayCards.push(<PlayingCard suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={1} isDraggable={isDraggable} key={crypto.randomUUID()}></PlayingCard>)
+        displayCards.push(<PlayingCard cardSize={cardSize} suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={1} isDraggable={isDraggable} key={crypto.randomUUID()}></PlayingCard>)
     }
     if (cards.length > 1) {
         const topCard = cards[cards.length - 2];
-        displayCards.push(<PlayingCard suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={0} isDraggable={isDraggable} key={crypto.randomUUID()}></PlayingCard>)
+        displayCards.push(<PlayingCard cardSize={cardSize} suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={0} isDraggable={isDraggable} key={crypto.randomUUID()}></PlayingCard>)
     }
+    const cardSizeClass = cardSize == CardSize.Standard ? 'card' : 'card-small';
+    const stackClasses = `${cardSizeClass} card-stack`;
     return (
-        <div className='card card-stack' ref={ref}>
+        <div className={stackClasses} ref={ref}>
             <div className="card-stack-inner">
                 {displayCards}
             </div>

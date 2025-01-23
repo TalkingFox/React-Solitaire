@@ -1,11 +1,10 @@
 import { Fragment, MouseEventHandler, RefObject, useRef } from 'react'
-import CardCenter from '../card-center/CardCenter'
 import { GetSymbolAndColorFromSuit } from '../CardSymbolGenerator'
 import './PlayingCardSmall.css'
 import { useDraggable } from '../../../hooks/useDraggable'
 import { createPortal } from 'react-dom'
 import { previewStyles } from '../../../shared/style'
-import { CardProps, ChildrenAreInDescendingOrderWithAlternatingSuits, FacesByText } from '../PlayingCard'
+import { CardProps, ChildrenAreInDescendingOrderWithAlternatingSuits} from '../PlayingCard'
 
 function RenderFaceDownCard(onClick?: () => void) {
     return (
