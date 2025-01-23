@@ -9,7 +9,7 @@ import { CardProps, ChildrenAreInDescendingOrderWithAlternatingSuits, FacesByTex
 
 function RenderFaceDownCard(onClick?: () => void) {
     return (
-        <div className='card card-back' onClick={onClick}>
+        <div className='card-small card-back' onClick={onClick}>
             <div className='card-back-border'>
                 <div className='card-back-border-2'>
                     <div className='card-back-pattern-container'>
@@ -29,14 +29,9 @@ function PlayingCardSmall({ suit, text, isFaceDown = false, onClick, isDraggable
     if (isFaceDown) {
         return RenderFaceDownCard(onClick);
     }
-    const [cardSymbol, cardColor] = GetSymbolAndColorFromSuit(suit)
-    let numberOfElements = Number(text);
-    if (isNaN(numberOfElements)) {
-        numberOfElements = 1
-    }
-    const cardClasses = `card suit-${cardColor}`
-    const cardFace = FacesByText.get(text) ?? ''
 
+    const [cardSymbol, cardColor] = GetSymbolAndColorFromSuit(suit)
+    const cardClasses = `card-small suit-${cardColor}`
     const itemRef = useRef<HTMLDivElement>(null);
 
     if (isDraggable && children && children.length > 0) {
@@ -99,12 +94,14 @@ function PlayingCardSmall({ suit, text, isFaceDown = false, onClick, isDraggable
                     style={{ opacity: (state == 'dragging' || isDragging) ? 0 : 1, zIndex: zIndex ?? 0 }}
                     onClick={onClick}
                     onContextMenu={contextMenuEvent}>
-                    <div className="card-header">
+                    <div className="card-header-small">
                         <span>{text}</span>
                         <span>{cardSymbol}</span>
                     </div>
-                    <CardCenter symbol={cardSymbol} numberOfElements={numberOfElements} face={cardFace} />
-                    <div className="card-footer">
+                    <div className='card-center-small card-center--centered'>
+                        <span className='card-face-small'>{cardSymbol}</span>
+                    </div>
+                    <div className="card-footer-small">
                         <span>{cardSymbol}</span>
                         <span>{text}</span>
                     </div>
@@ -115,12 +112,14 @@ function PlayingCardSmall({ suit, text, isFaceDown = false, onClick, isDraggable
             {preview && createPortal(
                 <div className='card-parent' ref={castPreview} style={previewStyles(preview) as React.CSSProperties}>
                     <div className={cardClasses} >
-                        <div className="card-header">
+                        <div className="card-header-small">
                             <span>{text}</span>
                             <span>{cardSymbol}</span>
                         </div>
-                        <CardCenter symbol={cardSymbol} numberOfElements={numberOfElements} face={cardFace} />
-                        <div className="card-footer">
+                        <div className='card-center-small card-center--centered'>
+                            <span className='card-face-small'>{cardSymbol}</span>
+                        </div>
+                        <div className="card-footer-small">
                             <span>{cardSymbol}</span>
                             <span>{text}</span>
                         </div>

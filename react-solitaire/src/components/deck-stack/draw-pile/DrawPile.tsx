@@ -1,12 +1,13 @@
-import PlayingCard, { CardProps, CardSource } from '../../playing-card/PlayingCard';
+import PlayingCard, { CardProps, CardSize, CardSource } from '../../playing-card/PlayingCard';
 import './DrawPile.css';
 
 export interface DrawPileProps {
     playedCards: CardProps[],
+    cardSize?: CardSize,
     cardRightClicked: (card: CardProps) => void
 }
 
-function DrawPile({ playedCards, cardRightClicked }: DrawPileProps) {
+function DrawPile({ playedCards, cardSize = CardSize.Standard, cardRightClicked }: DrawPileProps) {
     
     return (
         <div className='draw-pile'>
@@ -21,6 +22,7 @@ function DrawPile({ playedCards, cardRightClicked }: DrawPileProps) {
                                 isDraggable={index == (playedCards.length - 1) ? true : false}
                                 onRightClick={index == (playedCards.length - 1) ? cardRightClicked : undefined}
                                 source={CardSource.DrawPile}
+                                cardSize={cardSize}
                             >
                             </PlayingCard>
                         </div>

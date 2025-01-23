@@ -1,16 +1,17 @@
 import { CardSuit } from "../../shared/enums"
-import PlayingCard, { CardProps, CardSource } from "../playing-card/PlayingCard";
+import PlayingCard, { CardProps, CardSize, CardSource } from "../playing-card/PlayingCard";
 import './DeckStack.css'
 import DrawPile from "./draw-pile/DrawPile";
 
 export interface DeckStackProps {
     deck: CardProps[],
     playedCards: CardProps[],
+    cardSize?: CardSize,
     drawCardsClicked: () => void,
     cardRightClicked: (card: CardProps) => void
 }
 
-function DeckStack({ deck, playedCards, drawCardsClicked, cardRightClicked }: DeckStackProps) {
+function DeckStack({ deck, playedCards, cardSize = CardSize.Standard, drawCardsClicked, cardRightClicked }: DeckStackProps) {
     let deckElement: JSX.Element;
     if (deck.length > 0) {
         deckElement = <PlayingCard
@@ -19,6 +20,7 @@ function DeckStack({ deck, playedCards, drawCardsClicked, cardRightClicked }: De
             isFaceDown={true}
             onClick={drawCardsClicked}
             source={CardSource.DrawPile}
+            cardSize={cardSize}
         />
     }
     else {
@@ -32,7 +34,10 @@ function DeckStack({ deck, playedCards, drawCardsClicked, cardRightClicked }: De
     return (
         <div className="deck-stack">
             {deckElement}
-            <DrawPile playedCards={playedCards.slice(-3)} cardRightClicked={cardRightClicked}></DrawPile>
+            <DrawPile playedCards={playedCards.slice(-3)}
+                cardRightClicked={cardRightClicked}
+                cardSize={cardSize}
+            ></DrawPile>
         </div>
     )
 }

@@ -5,7 +5,7 @@ import './Crossword.css';
 import { Variant } from '../../shared/variants';
 import CardStack from '../card-stack/CardStack';
 import DeckStack from '../deck-stack/DeckStack';
-import { CardProps, CardSource } from '../playing-card/PlayingCard';
+import { CardProps, CardSize, CardSource } from '../playing-card/PlayingCard';
 import { DeckBuilder } from '../../shared/deck-builder';
 import { CardSuit } from '../../shared/enums';
 
@@ -55,7 +55,8 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
                 <DeckStack cardRightClicked={console.log}
                     deck={drawDeck}
                     drawCardsClicked={() => {}}
-                    playedCards={drawPile}></DeckStack>
+                    playedCards={drawPile}
+                    cardSize={CardSize.Small}></DeckStack>
             </div>
             <div className='crossword-column'></div>
             <div className='crossword-column'>

@@ -9,6 +9,17 @@
     height: 8rem;
 }
 
+.card-small {
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: white;
+    padding: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+    cursor: grab;
+    width: 3.67rem;
+    height: 4.8rem;
+}
+
 .card-back {
     background-color: rgb(29, 78, 216);
     cursor: pointer !important;
@@ -90,6 +101,7 @@
 .card-footer>span {
     transform: rotate(180deg);
 }
+
 
 .value-parent {
     display: table;
