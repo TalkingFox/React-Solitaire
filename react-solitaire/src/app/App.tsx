@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Variant } from '../shared/variants.ts';
 import Freecell from '../components/freecell/Freecell.tsx';
 import Osmosis from '../components/osmosis/Osmosis.tsx';
+import Crossword from '../components/crossword/Crossword.tsx';
 
 function App() {
     useEffect(() => {
@@ -29,6 +30,8 @@ function App() {
         case Variant.Osmosis:
             cardGameElement = <Osmosis onVariantChanged={changeVariant}></Osmosis>
             break;
+        case Variant.Crossword:
+            cardGameElement = <Crossword onVariantChanged={changeVariant}></Crossword>
     }
 
     return (

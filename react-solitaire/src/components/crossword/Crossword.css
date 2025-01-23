@@ -1,0 +1,59 @@
+.crossword-parent {
+    justify-content: center;
+    gap: 10px;
+}
+
+.crossword-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.crossword-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+} 
+
+/* 60% of the size size from base card size */
+/* .crossword-parent .card {
+    width: 3.67rem;
+    height: 4.8rem;
+}
+
+.crossword-parent .card-header {
+    line-height: 0.75;
+    font-size: 0.8em;
+}
+
+
+.crossword-parent .card-footer {
+    line-height: 0.75;
+    font-size: 0.8em;
+}
+
+.crossword-parent .card-value {
+    font-size: 0.75em;
+}
+
+.crossword-parent .card-center {
+    width: 60px;
+    min-height: 60%;
+    padding: 5px 9px 0px 9px;
+    margin-top: -10px;
+}
+
+.crossword-parent .card-symbol-column--centered {
+    gap: 0.75em;
+}
+
+.crossword-parent .card-symbol-column {
+    font-size: 0.54em;
+}
+
+.crossword-parent .card-face {
+    font-size: 3em;
+    margin: -12px;
+}*/
+
