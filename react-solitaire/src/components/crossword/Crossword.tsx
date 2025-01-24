@@ -64,7 +64,29 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
         const newBoard = board.slice(0);
         newBoard[boardIndex] = card;
         setBoard(newBoard);
-    };
+
+        if (drawPile.length > 0) {
+            const drawPileCard = drawPile[drawPile.length - 1];
+            if (drawPileCard.suit == card.suit && drawPileCard.text == card.text) {
+                const newDrawDeck = drawDeck.slice(0);
+                const newDrawPile = newDrawDeck.length > 0 ? [newDrawDeck.pop() as CardProps] : [];
+                setDrawDeck(newDrawDeck);
+                setDrawPile(newDrawPile);
+                return;
+            }
+        }
+
+        if (courtPile.length > 0) {
+            const courtPileCard = courtPile[courtPile.length - 1];
+            if (courtPileCard.suit == card.suit && courtPileCard.text == card.text) {
+                const newCourtDeck = courtDeck.slice(0);
+                const newCourtPile = newCourtDeck.length > 0 ? [newCourtDeck.pop() as CardProps] : [];
+                setCourtDeck(newCourtDeck);
+                setCourtPile(newCourtPile);
+                return;
+            }
+        }
+    }
 
     const elements: JSX.Element[] = [];
     board.forEach((boardCard, index) => {
