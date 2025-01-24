@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { SolitaireProps } from '../../shared/solitaire-props';
-import SidePanel from '../side-panel/SidePanel';
+import SidePanel, { SidePanelHandles } from '../side-panel/SidePanel';
 import './Crossword.css';
 import { Variant } from '../../shared/variants';
 import CardStack from '../card-stack/CardStack';
@@ -78,7 +78,7 @@ function isCardAdjacentToIndex(board: (CardProps | null)[], cardIndex: number): 
 const Crossword = ({ onVariantChanged }: SolitaireProps) => {
     const [startingDeck, startingCard] = useMemo(buildDeck, []);
     const [startingCourt, startingCourtPile] = useMemo(buildCourt, []);
-    const sidepanelRef = useRef(null);
+    const sidepanelRef = useRef<SidePanelHandles>(null);
 
     const [courtDeck, setCourtDeck] = useState<CardProps[]>(startingCourt);
     const [courtPile, setCourtPile] = useState<CardProps[]>([startingCourtPile])
@@ -90,6 +90,22 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
         return deck;
     }, []);
     const [board, setBoard] = useState<(CardProps | null)[]>(startingBoard);
+
+    const startNewGame = () => {
+        const [newDeck, newStartingCard] = buildDeck();
+        const [newCourt, newCourtPile] = buildCourt();
+
+        const newBoard = new Array<CardProps | null>(49).fill(null);
+
+        setBoard(newBoard);
+        setDrawDeck(newDeck);
+        setDrawPile([newStartingCard]);
+        setCourtDeck(newCourt);
+        setCourtPile([newCourtPile]);
+
+        sidepanelRef.current?.setTimerPaused(false);
+        sidepanelRef.current?.resetTimer();
+    };
 
     const cardDroppedToBoard = (card: CardProps, boardIndex: number) => {
         const existingCard = board[boardIndex];
@@ -124,6 +140,7 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
             if (courtPileCard.suit == card.suit && courtPileCard.text == card.text) {
                 const newCourtDeck = courtDeck.slice(0);
                 const newCourtPile = newCourtDeck.length > 0 ? [newCourtDeck.pop() as CardProps] : [];
+                card.isFaceDown = true;
                 setCourtDeck(newCourtDeck);
                 setCourtPile(newCourtPile);
                 return;
@@ -172,7 +189,7 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
             <SidePanel ref={sidepanelRef}
                 activeVariant={Variant.Crossword}
                 autoSolveClicked={console.log}
-                newGameClicked={console.log}
+                newGameClicked={startNewGame}
                 restartClicked={console.log}
                 showAutoSolve={false}
                 undoClicked={console.log}

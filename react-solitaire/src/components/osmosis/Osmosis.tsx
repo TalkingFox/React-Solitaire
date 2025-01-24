@@ -67,13 +67,13 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
 
     const startNewGame = () => {
         const newDeck = DeckBuilder.BuildDeck();
-        const newReservces = buildReserves(newDeck);
+        const newReserves = buildReserves(newDeck);
 
         const startingCard = newDeck.pop() as CardProps;
         const newStacks = [[startingCard], [], [], []];
         setCardStacks(newStacks);
 
-        setReserves(newReservces);
+        setReserves(newReserves);
         setDrawDeck(newDeck);
         setDrawPile([]);
 
@@ -81,7 +81,7 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
             cardStacks: newStacks,
             drawDeck: newDeck,
             drawPile: [],
-            reserves: newReservces
+            reserves: newReserves
         }, true);
 
         sidepanelRef.current?.setTimerPaused(false);

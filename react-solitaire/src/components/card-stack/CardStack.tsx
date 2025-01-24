@@ -43,11 +43,31 @@ function CardStack({ cards, isDraggable, cardSize = CardSize.Standard, onCardDro
     }
     if (cards.length > 0) {
         const topCard = cards[cards.length - 1];
-        displayCards.push(<PlayingCard cardSize={cardSize} suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={1} isDraggable={isDraggable} key={crypto.randomUUID()}></PlayingCard>)
+        displayCards.push(<PlayingCard
+            cardSize={cardSize}
+            suit={topCard.suit}
+            text={topCard.text}
+            source={CardSource.CardStack}
+            zIndex={1}
+            isDraggable={isDraggable}
+            key={crypto.randomUUID()}
+            isFaceDown={topCard.isFaceDown}
+        >
+        </PlayingCard>)
     }
     if (cards.length > 1) {
         const topCard = cards[cards.length - 2];
-        displayCards.push(<PlayingCard cardSize={cardSize} suit={topCard.suit} text={topCard.text} source={CardSource.CardStack} zIndex={0} isDraggable={isDraggable} key={crypto.randomUUID()}></PlayingCard>)
+        displayCards.push(<PlayingCard
+            cardSize={cardSize}
+            suit={topCard.suit}
+            text={topCard.text}
+            source={CardSource.CardStack}
+            zIndex={0}
+            isDraggable={isDraggable}
+            key={crypto.randomUUID()}
+            isFaceDown={topCard.isFaceDown}
+        >
+        </PlayingCard>)
     }
     const cardSizeClass = cardSize == CardSize.Standard ? 'card' : 'card-small';
     const stackClasses = `${cardSizeClass} card-stack`;
