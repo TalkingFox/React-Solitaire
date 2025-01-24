@@ -39,6 +39,42 @@ function buildCourt(): [CardProps[], CardProps] {
     return [court, court.pop() as CardProps];
 }
 
+function isCardAdjacentToIndex(board: (CardProps | null)[], cardIndex: number): boolean {
+    // Check North.
+    if (cardIndex >= 7) {
+        const northCard = board[cardIndex - 7];
+        if (northCard) {
+            return true;
+        }
+    }
+
+    // Check East
+    if (cardIndex % 7 != 6) {
+        const eastCard = board[cardIndex + 1];
+        if (eastCard) {
+            return true;
+        }
+    }
+
+    // Check West
+    if (cardIndex % 7 != 0) {
+        const westCard = board[cardIndex - 1];
+        if (westCard) {
+            return true;
+        }
+    }
+
+    // Check South
+    if (cardIndex < 42) {
+        const southCard = board[cardIndex + 7];
+        if (southCard) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 const Crossword = ({ onVariantChanged }: SolitaireProps) => {
     const [startingDeck, startingCard] = useMemo(buildDeck, []);
     const [startingCourt, startingCourtPile] = useMemo(buildCourt, []);
@@ -58,6 +94,13 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
     const cardDroppedToBoard = (card: CardProps, boardIndex: number) => {
         const existingCard = board[boardIndex];
         if (existingCard) {
+            return;
+        }
+
+        // Check if card is being placed next to another card.
+        const cardsInPlay = drawDeck.length + drawPile.length + courtDeck.length + courtPile.length;
+        // If no cards have been added to the board, then card may be placed anywhere.
+        if (cardsInPlay < 52 && !isCardAdjacentToIndex(board, boardIndex)) {
             return;
         }
 
