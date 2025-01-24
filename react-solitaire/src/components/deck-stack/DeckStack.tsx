@@ -24,7 +24,9 @@ function DeckStack({ deck, playedCards, cardSize = CardSize.Standard, drawCardsC
         />
     }
     else {
-        deckElement = <div className="card deck" onClick={drawCardsClicked}>
+        const sizeClass = cardSize == CardSize.Standard ? 'card' : 'card-small';
+        const className = `${sizeClass} deck`;
+        deckElement = <div className={className} onClick={drawCardsClicked}>
             <div className="deck-outline">
                 <div className="deck-ring"></div>
             </div>
