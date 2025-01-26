@@ -8,6 +8,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     width: 100%;
+    gap: 10px;
 }
 
 .crossword-column {
@@ -18,4 +19,18 @@
 
 .crossword-spacer {
     width: 5em;
+}
+
+.crossword-counter {
+    width: 3.67rem;
+    padding: 0 6px 0 6px;    /*Padding of 5px plus 1 px for border*/
+}
+
+.crossword-row-counter {
+    align-self: center;
+    width: 1rem;
+}
+
+.crossword-counter-row {
+    padding-left: 1.5rem;
 }

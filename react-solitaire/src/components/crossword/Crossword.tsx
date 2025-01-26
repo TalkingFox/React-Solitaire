@@ -8,6 +8,7 @@ import DeckStack from '../deck-stack/DeckStack';
 import { CardProps, CardSize, CardSource } from '../playing-card/PlayingCard';
 import { DeckBuilder } from '../../shared/deck-builder';
 import { CardSuit } from '../../shared/enums';
+import { CARD_VALUE_BY_TEXT } from '../../shared/card-values';
 
 function buildDeck(): [CardProps[], CardProps] {
     const courtSet: Set<string> = new Set(['J', 'Q', 'K']);
@@ -73,6 +74,28 @@ function isCardAdjacentToIndex(board: (CardProps | null)[], cardIndex: number): 
     }
 
     return false;
+}
+
+function sumColumn(board: (CardProps | null)[], columnIndex: number): number {
+    let sum = 0;
+    for (let i = 0; i < 7; i++) {
+        const columnCard = board[columnIndex + (7 * i)];
+        if (columnCard && !columnCard.isFaceDown) {
+            sum += CARD_VALUE_BY_TEXT[columnCard.text];
+        }
+    }
+    return sum;
+}
+
+function sumRow(board: (CardProps | null)[], rowIndex: number): number {
+    let sum = 0;
+    for (let i = 0; i < 7; i++) {
+        const columnCard = board[(rowIndex * 7) + i];
+        if (columnCard && !columnCard.isFaceDown) {
+            sum += CARD_VALUE_BY_TEXT[columnCard.text];
+        }
+    }
+    return sum;
 }
 
 const Crossword = ({ onVariantChanged }: SolitaireProps) => {
@@ -162,10 +185,18 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
     const rows: JSX.Element[] = [];
     for (let i = 0; i < 7; i++) {
         const row = <div className='crossword-row' key={crypto.randomUUID()}>
+            <span className='crossword-row-counter' key={crypto.randomUUID()}>{sumRow(board, i)}</span>
             {elements.slice(7 * i, 7 * (i + 1))}
         </div>
         rows.push(row);
     }
+
+    const columnCounters: JSX.Element[] = [];
+    for (let i = 0; i < 7; i++) {
+
+        columnCounters.push(<span className='crossword-counter' key={crypto.randomUUID()}>{sumColumn(board, i)}</span>)
+    }
+    const counterRow = <div className='crossword-row crossword-counter-row'>{columnCounters}</div>;
 
     return (
         <div className='crossword-parent crossword-row'>
@@ -184,6 +215,7 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
             </div>
             <div className='crossword-column crossword-spacer'></div>
             <div className='crossword-column crossword-board'>
+                {counterRow}
                 {rows}
             </div>
             <SidePanel ref={sidepanelRef}
