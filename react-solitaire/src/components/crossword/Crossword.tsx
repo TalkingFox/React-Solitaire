@@ -229,6 +229,17 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
         setShowWinBanner(false);
     };
 
+    const restartGame = () => {
+        if (undoStack.length == 0) {
+            return;
+        }
+
+        const newStack = [undoStack[0]];
+        loadState(newStack[0]);
+        setUndoStack(newStack);
+        setShowWinBanner(false);
+    };
+
     const cardDroppedToBoard = (card: CardProps, boardIndex: number) => {
         const existingCard = board[boardIndex];
         if (existingCard) {
@@ -376,7 +387,7 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
                 activeVariant={Variant.Crossword}
                 autoSolveClicked={() => { }}
                 newGameClicked={startNewGame}
-                restartClicked={console.log}
+                restartClicked={restartGame}
                 showAutoSolve={false}
                 undoClicked={undoLastMove}
                 variantSelected={onVariantChanged}
