@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SolitaireProps } from '../../shared/solitaire-props';
 import SidePanel, { SidePanelHandles } from '../side-panel/SidePanel';
 import './Crossword.css';
@@ -9,6 +9,7 @@ import { CardProps, CardSize, CardSource } from '../playing-card/PlayingCard';
 import { DeckBuilder } from '../../shared/deck-builder';
 import { CardSuit } from '../../shared/enums';
 import { CARD_VALUE_BY_TEXT } from '../../shared/card-values';
+import WinBanner from '../win-banner/WinBanner';
 
 function buildDeck(): [CardProps[], CardProps] {
     const courtSet: Set<string> = new Set(['J', 'Q', 'K']);
@@ -125,6 +126,34 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
         return deck;
     }, []);
     const [board, setBoard] = useState<(CardProps | null)[]>(startingBoard);
+    const [showWinBanner, setShowWinBanner] = useState(false);
+
+    useEffect(() => {
+        const isBoardFull = board.every((card) => card);
+        if (!isBoardFull) {
+            return;
+        }
+
+        // Check for even row sums
+        for (let i = 0; i < 7; i++) {
+            const sums = fetchRowCounts(board, i);
+            if (sums.some((sum => sum % 2 == 1))) {
+                return;
+            }
+        }
+
+        // Check for even column sums
+        for (let i = 0; i < 7; i++) {
+            const sums = fetchColumnCounts(board, i);
+            if (sums.some((sum => sum % 2 == 1))) {
+                return;
+            }
+        }
+
+        setShowWinBanner(true);
+        sidepanelRef.current?.setTimerPaused(true);
+
+    }, [board]);
 
     const startNewGame = () => {
         const [newDeck, newStartingCard] = buildDeck();
@@ -182,6 +211,11 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
             }
         }
     }
+
+    const onHideWinBanner = () => {
+        sidepanelRef.current?.setTimerPaused(true);
+        setShowWinBanner(false);
+    };
 
     const elements: JSX.Element[] = [];
     board.forEach((boardCard, index) => {
@@ -254,6 +288,7 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
                 undoClicked={console.log}
                 variantSelected={onVariantChanged}
             ></SidePanel>
+            {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
         </div>
 
     )
