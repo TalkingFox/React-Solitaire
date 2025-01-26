@@ -81,7 +81,7 @@ function fetchColumnCounts(board: (CardProps | null)[], columnIndex: number): nu
     let sumIndex = 0;
     for (let i = 0; i < 7; i++) {
         const columnCard = board[columnIndex + (7 * i)];
-        if (columnCard?.isFaceDown && i != 6) {
+        if (columnCard?.isFaceDown && i > 0 && i < 6) {
             sums.push(0);
             sumIndex++;
             continue
@@ -98,7 +98,7 @@ function fetchRowCounts(board: (CardProps | null)[], rowIndex: number): number[]
     let sumIndex = 0;
     for (let i = 0; i < 7; i++) {
         const columnCard = board[(rowIndex * 7) + i];
-        if (columnCard?.isFaceDown) {
+        if (columnCard?.isFaceDown && i > 0 && i < 6) {
             sums.push(0);
             sumIndex++;
             continue
