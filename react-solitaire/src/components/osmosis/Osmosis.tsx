@@ -63,7 +63,7 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
 
         setShowWinBanner(true);
         sidepanelRef.current?.setTimerPaused(true);
-    },[cardStacks]);
+    }, [cardStacks]);
 
     const startNewGame = () => {
         const newDeck = DeckBuilder.BuildDeck();
@@ -289,7 +289,7 @@ const Osmosis = ({ onVariantChanged }: SolitaireProps) => {
                 newGameClicked={startNewGame}
                 undoClicked={undoLastMove}
                 showAutoSolve={false}
-                autoSolveClicked={console.log}
+                autoSolveClicked={() => { }}
                 variantSelected={onVariantChanged}
                 restartClicked={restartGame}></SidePanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}

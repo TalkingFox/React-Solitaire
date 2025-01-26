@@ -371,11 +371,11 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
                     drawCardsClicked={() => { }}
                     playedCards={drawPile}
                     cardSize={CardSize.Small}></DeckStack>
-                <DeckStack cardRightClicked={console.log}
+                <DeckStack cardRightClicked={() => { }}
                     deck={courtDeck}
                     cardSize={CardSize.Small}
                     playedCards={courtPile}
-                    drawCardsClicked={console.log}
+                    drawCardsClicked={() => { }}
                 ></DeckStack>
             </div>
             <div className='crossword-column crossword-spacer'></div>
