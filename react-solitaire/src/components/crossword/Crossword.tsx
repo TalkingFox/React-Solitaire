@@ -11,6 +11,14 @@ import { CardSuit } from '../../shared/enums';
 import { CARD_VALUE_BY_TEXT } from '../../shared/card-values';
 import WinBanner from '../win-banner/WinBanner';
 
+interface CrosswordStateHistory {
+    drawDeck?: CardProps[],
+    drawPile?: CardProps[],
+    court?: CardProps[],
+    courtPile?: CardProps[],
+    board?: (CardProps | null)[]
+}
+
 function buildDeck(): [CardProps[], CardProps] {
     const courtSet: Set<string> = new Set(['J', 'Q', 'K']);
     const deck = DeckBuilder
@@ -82,7 +90,16 @@ function fetchColumnCounts(board: (CardProps | null)[], columnIndex: number): nu
     let sumIndex = 0;
     for (let i = 0; i < 7; i++) {
         const columnCard = board[columnIndex + (7 * i)];
-        if (columnCard?.isFaceDown && i > 0 && i < 6) {
+        if (columnCard?.isFaceDown) {
+            if (i == 0 || i == 6) {
+                continue
+            }
+
+            const lastCard = board[columnIndex + (7 * (i - 1))]
+            if (lastCard?.isFaceDown) {
+                continue;
+            }
+
             sums.push(0);
             sumIndex++;
             continue
@@ -99,7 +116,15 @@ function fetchRowCounts(board: (CardProps | null)[], rowIndex: number): number[]
     let sumIndex = 0;
     for (let i = 0; i < 7; i++) {
         const columnCard = board[(rowIndex * 7) + i];
-        if (columnCard?.isFaceDown && i > 0 && i < 6) {
+        if (columnCard?.isFaceDown) {
+            if (i == 0 || i == 6) {
+                continue
+            }
+
+            const lastCard = board[(rowIndex * 7) + (i - 1)];
+            if (lastCard?.isFaceDown) {
+                continue
+            }
             sums.push(0);
             sumIndex++;
             continue
@@ -128,6 +153,15 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
     const [board, setBoard] = useState<(CardProps | null)[]>(startingBoard);
     const [showWinBanner, setShowWinBanner] = useState(false);
 
+    const [undoStack, setUndoStack] = useState<CrosswordStateHistory[]>([{
+        board: board.map((card) => card ? structuredClone(card) : card),
+        court: courtDeck.map(card => structuredClone(card)),
+        courtPile: courtPile.map(card => structuredClone(card)),
+        drawDeck: drawDeck.map(card => structuredClone(card)),
+        drawPile: drawPile.map(card => structuredClone(card))
+    }]);
+
+
     useEffect(() => {
         const isBoardFull = board.every((card) => card);
         if (!isBoardFull) {
@@ -155,6 +189,20 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
 
     }, [board]);
 
+    const updateUndoStack = (sourceData: CrosswordStateHistory, clearStack: boolean = false) => {
+        const snapshot: CrosswordStateHistory = {
+            board: (sourceData.board ?? board).map(card => card ? structuredClone(card) : card),
+            court: (sourceData.court ?? courtDeck).map(card => structuredClone(card)),
+            courtPile: (sourceData.courtPile ?? courtPile).map(card => structuredClone(card)),
+            drawDeck: (sourceData.drawDeck ?? drawDeck).map(card => structuredClone(card)),
+            drawPile: (sourceData.drawPile ?? drawPile).map(card => structuredClone(card))
+        };
+
+        const newStack = clearStack ? [] : undoStack.slice(0);
+        newStack.push(snapshot);
+        setUndoStack(newStack);
+    };
+
     const startNewGame = () => {
         const [newDeck, newStartingCard] = buildDeck();
         const [newCourt, newCourtPile] = buildCourt();
@@ -167,8 +215,18 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
         setCourtDeck(newCourt);
         setCourtPile([newCourtPile]);
 
+        updateUndoStack({
+            board: newBoard,
+            court: newCourt,
+            courtPile: [newCourtPile],
+            drawDeck: newDeck,
+            drawPile: [newStartingCard]
+        }, true);
+
         sidepanelRef.current?.setTimerPaused(false);
         sidepanelRef.current?.resetTimer();
+
+        setShowWinBanner(false);
     };
 
     const cardDroppedToBoard = (card: CardProps, boardIndex: number) => {
@@ -188,6 +246,11 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
         newBoard[boardIndex] = card;
         setBoard(newBoard);
 
+        const snapshot: CrosswordStateHistory = {
+            board: newBoard
+        };
+
+        let foundCard = false;
         if (drawPile.length > 0) {
             const drawPileCard = drawPile[drawPile.length - 1];
             if (drawPileCard.suit == card.suit && drawPileCard.text == card.text) {
@@ -195,11 +258,13 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
                 const newDrawPile = newDrawDeck.length > 0 ? [newDrawDeck.pop() as CardProps] : [];
                 setDrawDeck(newDrawDeck);
                 setDrawPile(newDrawPile);
-                return;
+                snapshot.drawDeck = newDrawDeck;
+                snapshot.drawPile = newDrawPile;
+                foundCard = true;
             }
         }
 
-        if (courtPile.length > 0) {
+        if (!foundCard && courtPile.length > 0) {
             const courtPileCard = courtPile[courtPile.length - 1];
             if (courtPileCard.suit == card.suit && courtPileCard.text == card.text) {
                 const newCourtDeck = courtDeck.slice(0);
@@ -207,9 +272,12 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
                 card.isFaceDown = true;
                 setCourtDeck(newCourtDeck);
                 setCourtPile(newCourtPile);
-                return;
+                snapshot.court = newCourtDeck;
+                snapshot.courtPile = newCourtPile;
             }
         }
+
+        updateUndoStack(snapshot);
     }
 
     const onHideWinBanner = () => {
@@ -227,6 +295,31 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
         </CardStack>;
         elements.push(cardElement);
     });
+
+    const loadState = (revertState: CrosswordStateHistory) => {
+        setBoard(revertState.board!.map(card => card ? structuredClone(card) : card));
+        setCourtDeck(revertState.court!.map(card => structuredClone(card)));
+        setCourtPile(revertState.courtPile!.map(card => structuredClone(card)));
+        setDrawDeck(revertState.drawDeck!.map(card => structuredClone(card)));
+        setDrawPile(revertState.drawPile!.map(card => structuredClone(card)));
+    };
+
+    const undoLastMove = () => {
+        if (undoStack.length < 2) {
+            return;
+        }
+
+        const newStack = undoStack.slice(0);
+        newStack.pop();
+        if (newStack.length == 0) {
+            return;
+        }
+
+        const revertState = newStack[newStack.length - 1];
+        loadState(revertState);
+
+        setUndoStack(newStack);
+    };
 
     const rows: JSX.Element[] = [];
     for (let i = 0; i < 7; i++) {
@@ -281,11 +374,11 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
             </div>
             <SidePanel ref={sidepanelRef}
                 activeVariant={Variant.Crossword}
-                autoSolveClicked={console.log}
+                autoSolveClicked={() => { }}
                 newGameClicked={startNewGame}
                 restartClicked={console.log}
                 showAutoSolve={false}
-                undoClicked={console.log}
+                undoClicked={undoLastMove}
                 variantSelected={onVariantChanged}
             ></SidePanel>
             {showWinBanner ? <WinBanner onHideBanner={onHideWinBanner} onNewGame={startNewGame}></WinBanner> : undefined}
