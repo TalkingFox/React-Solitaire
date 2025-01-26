@@ -76,26 +76,38 @@ function isCardAdjacentToIndex(board: (CardProps | null)[], cardIndex: number): 
     return false;
 }
 
-function sumColumn(board: (CardProps | null)[], columnIndex: number): number {
-    let sum = 0;
+function fetchColumnCounts(board: (CardProps | null)[], columnIndex: number): number[] {
+    let sums = [0];
+    let sumIndex = 0;
     for (let i = 0; i < 7; i++) {
         const columnCard = board[columnIndex + (7 * i)];
+        if (columnCard?.isFaceDown && i != 6) {
+            sums.push(0);
+            sumIndex++;
+            continue
+        }
         if (columnCard && !columnCard.isFaceDown) {
-            sum += CARD_VALUE_BY_TEXT[columnCard.text];
+            sums[sumIndex] += CARD_VALUE_BY_TEXT[columnCard.text];
         }
     }
-    return sum;
+    return sums;
 }
 
-function sumRow(board: (CardProps | null)[], rowIndex: number): number {
-    let sum = 0;
+function fetchRowCounts(board: (CardProps | null)[], rowIndex: number): number[] {
+    let sums = [0];
+    let sumIndex = 0;
     for (let i = 0; i < 7; i++) {
         const columnCard = board[(rowIndex * 7) + i];
+        if (columnCard?.isFaceDown) {
+            sums.push(0);
+            sumIndex++;
+            continue
+        }
         if (columnCard && !columnCard.isFaceDown) {
-            sum += CARD_VALUE_BY_TEXT[columnCard.text];
+            sums[sumIndex] += CARD_VALUE_BY_TEXT[columnCard.text];
         }
     }
-    return sum;
+    return sums;
 }
 
 const Crossword = ({ onVariantChanged }: SolitaireProps) => {
@@ -184,8 +196,17 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
 
     const rows: JSX.Element[] = [];
     for (let i = 0; i < 7; i++) {
+        const counts = fetchRowCounts(board, i);
+        const sumElements: JSX.Element[] = [];
+        counts.forEach((count) => {
+            const counterClass = (count % 2 == 0) ? 'crossword-even' : 'crossword-odd';
+            const className = `crossword-row-counter ${counterClass}`;
+            sumElements.push(<span className={className} key={crypto.randomUUID()}>{count}</span>)
+        });
         const row = <div className='crossword-row' key={crypto.randomUUID()}>
-            <span className='crossword-row-counter' key={crypto.randomUUID()}>{sumRow(board, i)}</span>
+            <div className="crossword-row-counter-container" key={crypto.randomUUID()}>
+                {sumElements}
+            </div>
             {elements.slice(7 * i, 7 * (i + 1))}
         </div>
         rows.push(row);
@@ -193,8 +214,14 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
 
     const columnCounters: JSX.Element[] = [];
     for (let i = 0; i < 7; i++) {
-
-        columnCounters.push(<span className='crossword-counter' key={crypto.randomUUID()}>{sumColumn(board, i)}</span>)
+        const counts = fetchColumnCounts(board, i);
+        const sumElements: JSX.Element[] = [];
+        counts.forEach((count) => {
+            const counterClass = (count % 2 == 0) ? 'crossword-even' : 'crossword-odd';
+            const className = `crossword-counter ${counterClass}`;
+            sumElements.push(<span key={crypto.randomUUID()} className={className}>{count}</span>)
+        });
+        columnCounters.push(<div style={{ marginTop: -sumElements.length * 10 }} className='crossword-column-counter-container' key={crypto.randomUUID()}>{sumElements}</div>)
     }
     const counterRow = <div className='crossword-row crossword-counter-row'>{columnCounters}</div>;
 

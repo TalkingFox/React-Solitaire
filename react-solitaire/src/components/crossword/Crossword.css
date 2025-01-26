@@ -1,6 +1,6 @@
 .crossword-parent {
     justify-content: center;
-    gap: 10px;
+    gap: 0.5em;
 }
 
 .crossword-row {
@@ -8,13 +8,13 @@
     flex-direction: row;
     flex-wrap: wrap;
     width: 100%;
-    gap: 10px;
+    gap: 0.5em;
 }
 
 .crossword-column {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0.5em;
 }
 
 .crossword-spacer {
@@ -23,14 +23,39 @@
 
 .crossword-counter {
     width: 3.67rem;
-    padding: 0 6px 0 6px;    /*Padding of 5px plus 1 px for border*/
+
+    /*Padding of 5px plus 1 px for border*/
+    padding: 0 6px 0 6px;
+}
+
+.crossword-column-counter-container {
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    justify-content: end;
+    line-height: 1.25em;
+}
+
+.crossword-row-counter-container {
+    display: flex;
+    flex-direction: row;
+    width: 5rem;
+    justify-content: end;
 }
 
 .crossword-row-counter {
     align-self: center;
-    width: 1rem;
+    padding: 0.1em;
 }
 
 .crossword-counter-row {
-    padding-left: 1.5rem;
+    margin-left: 5.5em;
+}
+
+.crossword-even {
+    color: white;
+}
+
+.crossword-odd {
+    color: red;
 }
