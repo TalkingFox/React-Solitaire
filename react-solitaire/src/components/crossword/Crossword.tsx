@@ -10,6 +10,7 @@ import { DeckBuilder } from '../../shared/deck-builder';
 import { CardSuit } from '../../shared/enums';
 import { CARD_VALUE_BY_TEXT } from '../../shared/card-values';
 import WinBanner from '../win-banner/WinBanner';
+import { KeyModifier, useKeyPress } from '../../hooks/useKeyPress';
 
 interface CrosswordStateHistory {
     drawDeck?: CardProps[],
@@ -331,6 +332,8 @@ const Crossword = ({ onVariantChanged }: SolitaireProps) => {
 
         setUndoStack(newStack);
     };
+
+    useKeyPress({ keys: [{ modifier: KeyModifier.Control, key: 'z' }], callback: undoLastMove });
 
     const rows: JSX.Element[] = [];
     for (let i = 0; i < 7; i++) {
