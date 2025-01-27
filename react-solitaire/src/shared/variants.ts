@@ -1,5 +1,6 @@
 export enum Variant {
     Klondike = 'Klondike',
     Freecell = 'Freecell',
-    Osmosis = 'Osmosis'
+    Osmosis = 'Osmosis',
+    Crossword = 'Crossword'
 }

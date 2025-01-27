@@ -1,0 +1,61 @@
+.crossword-parent {
+    justify-content: center;
+    gap: 0.5em;
+}
+
+.crossword-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 0.5em;
+}
+
+.crossword-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.crossword-spacer {
+    width: 5em;
+}
+
+.crossword-counter {
+    width: 3.67rem;
+
+    /*Padding of 5px plus 1 px for border*/
+    padding: 0 6px 0 6px;
+}
+
+.crossword-column-counter-container {
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    justify-content: end;
+    line-height: 1.25em;
+}
+
+.crossword-row-counter-container {
+    display: flex;
+    flex-direction: row;
+    width: 5rem;
+    justify-content: end;
+}
+
+.crossword-row-counter {
+    align-self: center;
+    padding: 0.1em;
+}
+
+.crossword-counter-row {
+    margin-left: 5.5em;
+}
+
+.crossword-even {
+    color: white;
+}
+
+.crossword-odd {
+    color: red;
+}
